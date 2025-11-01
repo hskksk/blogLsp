@@ -1,0 +1,14 @@
+{
+  "blogLsp.provider": "openai",
+  "blogLsp.model": "gpt-4.1-mini",
+  "blogLsp.apiBaseUrl": "https://api.openai.com/v1",
+  "blogLsp.apiKey": "${env:OPENAI_API_KEY}",
+  "blogLsp.maxTokens": 128,
+  "blogLsp.temperature": 0.7,
+  "blogLsp.numSuggestions": 2,
+  "blogLsp.style": "tech-blog",
+  "blogLsp.language": "ja",
+  "blogLsp.privacy.scope": "paragraph",
+  "blogLsp.enableStreaming": true,
+  "blogLsp.timeoutMs": 20000
+}

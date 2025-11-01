@@ -1,0 +1,33 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "ES2024",
+		"lib": [
+			"ES2024"
+		],
+		"moduleResolution": "node",
+		"sourceMap": true,
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
+	},
+	"files": [],
+	"exclude": [
+		"node_modules",
+		".vscode-test",
+		"**/out",
+		"**/node_modules"
+	],
+	"references": [
+		{
+			"path": "./shared"
+		},
+		{
+			"path": "./client"
+		},
+		{
+			"path": "./server"
+		}
+	]
+}

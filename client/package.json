@@ -1,0 +1,24 @@
+{
+  "name": "@bloglsp/client",
+  "displayName": "Blog Markdown LSP",
+  "description": "Markdown editing assistant with LLM completions",
+  "version": "0.1.0",
+  "private": true,
+  "author": "hskksk",
+  "publisher": "hskksk",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/hskksk/blog_language_server"
+	},
+  "engines": {
+		"vscode": "^1.99.0"
+  },
+  "dependencies": {
+		"glob": "^11.0.0",
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+		"@types/vscode": "^1.99.0",
+		"@vscode/test-electron": "^2.3.9"
+	}
+}

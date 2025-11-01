@@ -1,0 +1,67 @@
+{
+  "name": "bloglsp",
+  "private": true,
+	"author": "hskksk",
+	"license": "MIT",
+  "version": "0.1.0",
+	"publisher": "hskksk",
+	"categories": [],
+	"main": "./client/out/extension",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/hskksk/bloglsp"
+	},
+  "engines": {
+		"vscode": "^1.99.0"
+  },
+	"activationEvents": [
+		"onLanguage:markdown"
+	],
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -b",
+	    "clean": "tsc -b -clean",
+        "watch": "tsc -b -w",
+		"lint": "eslint",
+		"postinstall": "cd shared && npm install && cd ../client && npm install && cd ../server && npm install && cd ..",
+		"test": "sh ./scripts/e2e.sh"
+	},
+	"keywords": [
+		"multi-root ready"
+	],
+	"contributes": {
+		"configuration": {
+			"type": "object",
+			"title": "Blog Language Server configuration",
+			"properties": {
+				"blogLsp.maxNumberOfProblems": {
+					"scope": "resource",
+					"type": "number",
+					"default": 100,
+					"description": "Controls the maximum number of problems produced by the server."
+				},
+				"blogLsp.trace.server": {
+					"scope": "window",
+					"type": "string",
+					"enum": [
+						"off",
+						"messages",
+						"verbose"
+					],
+					"default": "off",
+					"description": "Traces the communication between VS Code and the language server."
+				}
+			}
+		}
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.13.0",
+		"@stylistic/eslint-plugin": "^2.9.0",
+		"@types/mocha": "^10.0.6",
+		"@types/node": "^22",
+		"eslint": "^9.13.0",
+		"mocha": "^10.3.0",
+		"typescript": "^5.9.2",
+		"typescript-eslint": "^8.39.0"
+	}
+}

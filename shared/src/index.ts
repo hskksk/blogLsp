@@ -39,3 +39,12 @@ export function buildSystemPrompt(style: BlogLspConfig['style'], language: BlogL
   return `${base} ${styleText} ${langText} Keep Markdown and code blocks untouched.`;
 }
 
+// LLM Provider exports
+export { createLlmProvider, getAvailableProviders } from './llm/factory';
+export type { LangChainProviderConfig } from './llm/providers';
+export {
+  LangChainLlmProvider,
+  OpenAILangChainProvider,
+  AzureOpenAILangChainProvider,
+} from './llm/providers';
+

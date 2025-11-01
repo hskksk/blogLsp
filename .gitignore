@@ -6,3 +6,5 @@ out/
 .DS_Store
 *.log
 *.tsbuildinfo
+.env
+design/LANGUAGE_SERVER_PLAN.md

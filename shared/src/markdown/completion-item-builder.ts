@@ -99,3 +99,71 @@ export function buildCompletionItems(
   return completionItems;
 }
 
+/**
+ * 見出し補完アイテムを構築
+ * 見出しテキストに `# ` プレフィックスを追加してCompletionItemを作成
+ */
+export function buildHeadingCompletionItems(
+  options: Omit<BuildCompletionItemsOptions, 'kind' | 'sortPrefix'>
+): CompletionItem[] {
+  const {
+    completions,
+    position,
+    currentText,
+  } = options;
+
+  const completionItems: CompletionItem[] = [];
+
+  // currentTextから既存の#を除去（見出しレベルのみ保持）
+  const headingPrefix = currentText.match(/^#+\s*/)?.[0] || '';
+  const textWithoutHeading = currentText.replace(/^#+\s*/, '');
+
+  for (let index = 0; index < completions.length; index++) {
+    let headingText = completions[index].trim();
+
+    // 空の補完は除外
+    if (!headingText) {
+      continue;
+    }
+
+    // 補完の先頭から既存のテキスト（#を除いた部分）を除去
+    if (textWithoutHeading && headingText.startsWith(textWithoutHeading)) {
+      headingText = headingText.substring(textWithoutHeading.length).trim();
+    }
+
+    // 除去後に空になった場合は除外
+    if (!headingText) {
+      continue;
+    }
+
+    // 見出しプレフィックス（#）を含む完全な見出しテキストを作成
+    const fullHeading = headingPrefix + headingText;
+
+    // textEditを作成（カーソル位置から現在行の末尾まで置き換え）
+    const textEdit: TextEdit = {
+      range: {
+        start: {
+          line: position.line,
+          character: 0, // 行の先頭から
+        },
+        end: position, // カーソル位置まで
+      },
+      newText: fullHeading,
+    };
+
+    // 補完アイテムを作成
+    const item: CompletionItem = {
+      label: fullHeading,
+      detail: `Heading Suggestion ${index + 1}`,
+      kind: CompletionItemKind.Class, // 見出しはClassアイコンを使用
+      sortText: `100${index}`, // 見出しは文章補完より優先（100で始める）
+      textEdit,
+      insertTextFormat: InsertTextFormat.PlainText,
+    };
+
+    completionItems.push(item);
+  }
+
+  return completionItems;
+}
+

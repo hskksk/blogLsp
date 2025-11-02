@@ -1,0 +1,16 @@
+{{systemPrompt}}
+
+Context information (JSON):
+
+JSON Structure:
+- linesBefore (array, optional): Up to 5 lines before the cursor position
+- currentText (string, required): Text from the start of current line to cursor position
+- linesAfter (array, optional): Up to 5 lines after the cursor position
+
+JSON Data:
+{{contextJson}}
+
+Continue writing from the currentText, but do not repeat the currentText itself in the output. Generate only the continuation.
+Each continuation should be concise, about 1-2 sentences long.
+Maintain the same tone and style.
+

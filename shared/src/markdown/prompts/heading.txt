@@ -1,0 +1,16 @@
+{{systemPrompt}}
+
+Context information (JSON):
+
+JSON Structure:
+- linesBefore (array, optional): Up to 5 lines before the cursor position
+- currentLine (string, required): Current line text
+- linesAfter (array, optional): Up to 5 lines after the cursor position
+
+JSON Data:
+{{contextJson}}
+
+Suggest appropriate headings for the content in the context above.
+Suggest {{numSuggestions}} appropriate headings in {{language}}.
+Return only the heading text, one per line, without the # markdown syntax.
+

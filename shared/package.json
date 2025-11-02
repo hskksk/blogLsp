@@ -1,35 +1,41 @@
 {
   "name": "@bloglsp/shared",
-	"description": "Shared types and utilities for blog language server",
-	"author": "hskksk",
-	"license": "MIT",
+  "description": "Shared types and utilities for blog language server",
+  "author": "hskksk",
+  "license": "MIT",
   "version": "0.1.0",
-	"publisher": "hskksk",
+  "publisher": "hskksk",
   "private": true,
-	"main": "./out/index.js",
-	"types": "./out/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./out/index.d.ts",
-			"default": "./out/index.js"
-		}
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/hskksk/blog_language_server"
-	},
-	"engines": {
-		"vscode": "^1.100.0"
-	},
-	"dependencies": {
-		"@langchain/core": "^0.3.0",
-		"@langchain/openai": "^0.3.0",
-		"glob": "^11.0.0",
-		"vscode-languageclient": "^9.0.1",
-		"vscode-languageserver": "^9.0.1"
-	},
+  "main": "./out/index.js",
+  "types": "./out/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./out/index.d.ts",
+      "default": "./out/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hskksk/blog_language_server"
+  },
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.0",
+    "@langchain/openai": "^0.3.0",
+    "glob": "^11.0.0",
+    "mustache": "^4.2.0",
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1"
+  },
+  "scripts": {
+    "copy-templates": "mkdir -p out/markdown/prompts && cp -r src/markdown/prompts/* out/markdown/prompts/",
+    "postbuild": "npm run copy-templates"
+  },
   "devDependencies": {
-		"@types/vscode": "^1.100.0",
-		"@vscode/test-electron": "^2.3.9"
+    "@types/mustache": "^4.2.6",
+    "@types/vscode": "^1.100.0",
+    "@vscode/test-electron": "^2.3.9"
   }
 }

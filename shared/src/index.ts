@@ -1,3 +1,5 @@
+import { renderTemplate } from './markdown/prompt-loader';
+
 export type PrivacyScope = 'selection' | 'paragraph' | 'document';
 
 export interface BlogLspConfig {
@@ -35,10 +37,13 @@ export interface LlmProvider {
 }
 
 export function buildSystemPrompt(style: BlogLspConfig['style'], language: BlogLspConfig['language']): string {
-  const base = 'You are an assistant for technical blog writing in markdown format.';
   const styleText = style === 'tech-blog' ? 'Concise, clear, developer-friendly tone.' : style === 'formal' ? 'Formal, precise tone.' : 'Casual, friendly tone.';
-  const langText = language === 'ja' ? 'Language: Japanese.' : 'Language: English.';
-  return `${base} ${styleText} ${langText} Keep Markdown and code blocks untouched.`;
+  const languageText = language === 'ja' ? 'Language: Japanese.' : 'Language: English.';
+  
+  return renderTemplate('system', {
+    styleText,
+    languageText,
+  }).trim();
 }
 
 // LLM Provider exports
@@ -55,7 +60,7 @@ export {
 export { extractMarkdownContext, extractTextByScope } from './markdown/extractor';
 export { buildCompletionPrompt, buildHeadingSuggestionPrompt } from './markdown/prompt-builder';
 export { extractContextLines } from './markdown/context-extractor';
-export { buildCompletionItems } from './markdown/completion-item-builder';
+export { buildCompletionItems, buildHeadingCompletionItems } from './markdown/completion-item-builder';
 export type { MarkdownContext, ExtractionOptions, ExtractedText } from './markdown/types';
 export type { ContextLines, Position } from './markdown/context-extractor';
 export type { BuildCompletionItemsOptions } from './markdown/completion-item-builder';

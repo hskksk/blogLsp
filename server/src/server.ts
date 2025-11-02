@@ -16,8 +16,10 @@ import type {
 import {
   createLlmProvider,
   buildCompletionPrompt,
+  buildHeadingSuggestionPrompt,
   extractContextLines,
   buildCompletionItems,
+  buildHeadingCompletionItems,
 } from '@bloglsp/shared';
 
 const connection = createConnection(ProposedFeatures.all);
@@ -158,7 +160,7 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       completionProvider: {
-        triggerCharacters: ['\n', '.', ' '],
+        triggerCharacters: ['\n', '.', ' ', '#'],
         resolveProvider: false,
       },
     },
@@ -210,35 +212,94 @@ connection.onCompletion(async (params: CompletionParams) => {
       return [];
     }
 
-    // プロンプトを構築
-    const prompt = buildCompletionPrompt({
-      currentText: context.currentText,
-      linesBefore: context.linesBefore,
-      linesAfter: context.linesAfter,
-      config: currentConfig,
-    });
+    // トリガー文字とトリガー種別を確認
+    const triggerCharacter = params.context?.triggerCharacter;
+    const triggerKind = params.context?.triggerKind;
+    
+    // 見出し補完の場合（#がトリガー文字、または現在行が#で始まっている場合）
+    const isHeadingCompletion = triggerCharacter === '#' || 
+                                (triggerKind === 1 && context.currentText.trim().startsWith('#'));
 
-    connection.console.log(`Generating completions with prompt length: ${prompt.length}`);
+    let prompt: string;
+    let completionItems;
 
-    // LLMで補完を生成
-    const completions = await llmProvider.generateCompletions(
-      {
-        prompt,
-        language: currentConfig.language,
-        maxTokens: currentConfig.maxTokens,
-        temperature: currentConfig.temperature,
-        numSuggestions: currentConfig.numSuggestions,
+    if (isHeadingCompletion) {
+      // 見出し補完プロンプトを使用
+      prompt = buildHeadingSuggestionPrompt({
+        linesBefore: context.linesBefore,
+        currentLine: context.currentLine,
+        linesAfter: context.linesAfter,
+        config: currentConfig,
+      });
+
+      connection.console.log(`Generating heading suggestions with prompt length: ${prompt.length}`);
+
+      // LLMで見出し候補を生成
+      const headings = await llmProvider.generateCompletions(
+        {
+          prompt,
+          language: currentConfig.language,
+          maxTokens: currentConfig.maxTokens,
+          temperature: currentConfig.temperature,
+          numSuggestions: currentConfig.numSuggestions,
+        }
+      );
+
+      // 見出しCompletionItemに変換
+      completionItems = buildHeadingCompletionItems({
+        completions: headings,
+        position,
+        currentText: context.currentText,
+      });
+
+      connection.console.log(`Generated ${completionItems.length} heading suggestions`);
+    } else {
+      // 通常の文章補完プロンプトを使用
+      // 改行後（\nがトリガー）の場合は段落開始を提案
+      const isNewParagraph = triggerCharacter === '\n' || 
+                            (triggerKind === 1 && context.currentLine.trim().length === 0);
+      
+      if (isNewParagraph) {
+        // 新しい段落の開始を提案するプロンプト
+        prompt = buildCompletionPrompt({
+          currentText: context.currentText,
+          linesBefore: context.linesBefore,
+          linesAfter: context.linesAfter,
+          config: currentConfig,
+        });
+        // プロンプトに段落開始であることを明示（既存のプロンプトで対応可能）
+      } else {
+        // 通常の文章補完
+        prompt = buildCompletionPrompt({
+          currentText: context.currentText,
+          linesBefore: context.linesBefore,
+          linesAfter: context.linesAfter,
+          config: currentConfig,
+        });
       }
-    );
 
-    // CompletionItemに変換
-    const completionItems = buildCompletionItems({
-      completions,
-      position,
-      currentText: context.currentText,
-    });
+      connection.console.log(`Generating text completions with prompt length: ${prompt.length}`);
 
-    connection.console.log(`Generated ${completionItems.length} valid completions`);
+      // LLMで補完を生成
+      const completions = await llmProvider.generateCompletions(
+        {
+          prompt,
+          language: currentConfig.language,
+          maxTokens: currentConfig.maxTokens,
+          temperature: currentConfig.temperature,
+          numSuggestions: currentConfig.numSuggestions,
+        }
+      );
+
+      // CompletionItemに変換
+      completionItems = buildCompletionItems({
+        completions,
+        position,
+        currentText: context.currentText,
+      });
+
+      connection.console.log(`Generated ${completionItems.length} text completions`);
+    }
     
     return completionItems;
   } catch (error) {

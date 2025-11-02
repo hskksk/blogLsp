@@ -183,6 +183,40 @@
 					],
 					"default": "off",
 					"description": "Traces the communication between VS Code and the language server."
+				},
+				"blogLsp.completion.triggerOnHeading": {
+					"scope": "window",
+					"type": "boolean",
+					"default": true,
+					"description": "Enable heading suggestions when typing '#' character."
+				},
+				"blogLsp.completion.maxHeadingSuggestions": {
+					"scope": "window",
+					"type": "number",
+					"default": 3,
+					"minimum": 1,
+					"maximum": 10,
+					"description": "Maximum number of heading suggestions to generate."
+				},
+				"blogLsp.completion.maxTextSuggestions": {
+					"scope": "window",
+					"type": "number",
+					"default": 1,
+					"minimum": 1,
+					"maximum": 10,
+					"description": "Maximum number of text completion suggestions to generate."
+				},
+				"blogLsp.commands.enableHeadingGeneration": {
+					"scope": "window",
+					"type": "boolean",
+					"default": true,
+					"description": "Enable the heading generation command."
+				},
+				"blogLsp.commands.enableParagraphCompletion": {
+					"scope": "window",
+					"type": "boolean",
+					"default": true,
+					"description": "Enable the paragraph completion command."
 				}
 			}
 		}

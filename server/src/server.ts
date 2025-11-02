@@ -145,6 +145,68 @@ async function updateConfiguration(): Promise<void> {
   }
 }
 
+/**
+ * 補完機能の設定を取得
+ */
+async function getCompletionSettings(): Promise<{
+  triggerOnHeading: boolean;
+  maxHeadingSuggestions: number;
+  maxTextSuggestions: number;
+}> {
+  if (!hasConfigurationCapability) {
+    return {
+      triggerOnHeading: true,
+      maxHeadingSuggestions: 3,
+      maxTextSuggestions: 1,
+    };
+  }
+
+  try {
+    const config = await connection.workspace.getConfiguration('blogLsp');
+    return {
+      triggerOnHeading: config.completion?.triggerOnHeading ?? true,
+      maxHeadingSuggestions: config.completion?.maxHeadingSuggestions ?? 3,
+      maxTextSuggestions: config.completion?.maxTextSuggestions ?? 1,
+    };
+  } catch (error) {
+    connection.console.error(`Failed to get completion settings: ${error}`);
+    return {
+      triggerOnHeading: true,
+      maxHeadingSuggestions: 3,
+      maxTextSuggestions: 1,
+    };
+  }
+}
+
+/**
+ * コマンド機能の設定を取得
+ */
+async function getCommandSettings(): Promise<{
+  enableHeadingGeneration: boolean;
+  enableParagraphCompletion: boolean;
+}> {
+  if (!hasConfigurationCapability) {
+    return {
+      enableHeadingGeneration: true,
+      enableParagraphCompletion: true,
+    };
+  }
+
+  try {
+    const config = await connection.workspace.getConfiguration('blogLsp');
+    return {
+      enableHeadingGeneration: config.commands?.enableHeadingGeneration ?? true,
+      enableParagraphCompletion: config.commands?.enableParagraphCompletion ?? true,
+    };
+  } catch (error) {
+    connection.console.error(`Failed to get command settings: ${error}`);
+    return {
+      enableHeadingGeneration: true,
+      enableParagraphCompletion: true,
+    };
+  }
+}
+
 connection.onInitialize(async (params: InitializeParams): Promise<InitializeResult> => {
   hasConfigurationCapability = !!(
     params.capabilities.workspace && params.capabilities.workspace.configuration
@@ -243,13 +305,18 @@ connection.onCompletion(async (params: CompletionParams) => {
       return [];
     }
 
+    // 補完設定を取得
+    const completionSettings = await getCompletionSettings();
+
     // トリガー文字とトリガー種別を確認
     const triggerCharacter = params.context?.triggerCharacter;
     const triggerKind = params.context?.triggerKind;
     
     // 見出し補完の場合（#がトリガー文字、または現在行が#で始まっている場合）
-    const isHeadingCompletion = triggerCharacter === '#' || 
-                                (triggerKind === 1 && context.currentText.trim().startsWith('#'));
+    // ただし、設定で無効化されている場合は通常補完にフォールバック
+    const isHeadingCompletion = completionSettings.triggerOnHeading &&
+                                (triggerCharacter === '#' || 
+                                 (triggerKind === 1 && context.currentText.trim().startsWith('#')));
 
     let prompt: string;
     let completionItems;
@@ -265,14 +332,14 @@ connection.onCompletion(async (params: CompletionParams) => {
 
       connection.console.log(`Generating heading suggestions with prompt length: ${prompt.length}`);
 
-      // LLMで見出し候補を生成
+      // LLMで見出し候補を生成（独立したパラメータを使用）
       const headings = await llmProvider.generateCompletions(
         {
           prompt,
           language: currentConfig.language,
           maxTokens: currentConfig.maxTokens,
           temperature: currentConfig.temperature,
-          numSuggestions: currentConfig.numSuggestions,
+          numSuggestions: completionSettings.maxHeadingSuggestions,
         }
       );
 
@@ -311,14 +378,14 @@ connection.onCompletion(async (params: CompletionParams) => {
 
       connection.console.log(`Generating text completions with prompt length: ${prompt.length}`);
 
-      // LLMで補完を生成
+      // LLMで補完を生成（独立したパラメータを使用）
       const completions = await llmProvider.generateCompletions(
         {
           prompt,
           language: currentConfig.language,
           maxTokens: currentConfig.maxTokens,
           temperature: currentConfig.temperature,
-          numSuggestions: currentConfig.numSuggestions,
+          numSuggestions: completionSettings.maxTextSuggestions,
         }
       );
 
@@ -466,6 +533,10 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
     const command = params.command;
     const args = params.arguments || [];
 
+    // コマンド設定と補完設定を取得
+    const commandSettings = await getCommandSettings();
+    const completionSettings = await getCompletionSettings();
+
     if (command === 'bloglsp.completeSelection') {
       // 選択範囲の続きを生成
       const uri = args[0] as string;
@@ -493,7 +564,7 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
         language: currentConfig.language,
         maxTokens: currentConfig.maxTokens,
         temperature: currentConfig.temperature,
-        numSuggestions: 1,
+        numSuggestions: completionSettings.maxTextSuggestions,
       });
 
       if (completions.length === 0 || !completions[0]) {
@@ -530,6 +601,11 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
       await connection.workspace.applyEdit(edit);
 
     } else if (command === 'bloglsp.completeParagraph') {
+      // 設定で無効化されている場合はエラー
+      if (!commandSettings.enableParagraphCompletion) {
+        connection.window.showWarningMessage('Paragraph completion is disabled in settings');
+        return;
+      }
       // 段落を完成させる
       const uri = args[0] as string;
       const position = args[1] as { line: number; character: number };
@@ -556,7 +632,7 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
         language: currentConfig.language,
         maxTokens: currentConfig.maxTokens ? currentConfig.maxTokens * 2 : undefined, // より長いテキストを生成
         temperature: currentConfig.temperature,
-        numSuggestions: 1,
+        numSuggestions: completionSettings.maxTextSuggestions,
       });
 
       if (completions.length === 0 || !completions[0]) {
@@ -592,6 +668,11 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
       await connection.workspace.applyEdit(edit);
 
     } else if (command === 'bloglsp.insertHeading') {
+      // 設定で無効化されている場合はエラー
+      if (!commandSettings.enableHeadingGeneration) {
+        connection.window.showWarningMessage('Heading generation is disabled in settings');
+        return;
+      }
       // 見出し候補を挿入
       const uri = args[0] as string;
       const position = args[1] as { line: number; character: number };
@@ -618,7 +699,7 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
         language: currentConfig.language,
         maxTokens: currentConfig.maxTokens,
         temperature: currentConfig.temperature,
-        numSuggestions: 1,
+        numSuggestions: completionSettings.maxHeadingSuggestions,
       });
 
       if (headings.length === 0 || !headings[0]) {
@@ -663,6 +744,9 @@ connection.onCodeAction(async (params: CodeActionParams) => {
       return [];
     }
 
+    // コマンド設定を取得
+    const commandSettings = await getCommandSettings();
+
     const actions: CodeAction[] = [];
     const range = params.range;
 
@@ -688,8 +772,8 @@ connection.onCodeAction(async (params: CodeActionParams) => {
         end: { line: position.line, character: Number.MAX_SAFE_INTEGER },
       });
 
-      // 段落完成アクション（空行でない場合）
-      if (line.trim().length > 0) {
+      // 段落完成アクション（空行でない場合、設定で有効化されている場合のみ）
+      if (line.trim().length > 0 && commandSettings.enableParagraphCompletion) {
         actions.push({
           title: '段落を完成',
           kind: 'source.fixAll',
@@ -701,8 +785,8 @@ connection.onCodeAction(async (params: CodeActionParams) => {
         });
       }
 
-      // 見出し候補を挿入（現在行が#で始まる、または空行の場合）
-      if (line.trim().startsWith('#') || line.trim().length === 0) {
+      // 見出し候補を挿入（現在行が#で始まる、または空行の場合、設定で有効化されている場合のみ）
+      if ((line.trim().startsWith('#') || line.trim().length === 0) && commandSettings.enableHeadingGeneration) {
         actions.push({
           title: '見出し候補を挿入',
           kind: 'source.fixAll',

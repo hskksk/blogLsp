@@ -5,6 +5,6 @@ out/
 *.vsix
 .DS_Store
 *.log
-*.tsbuildinfo
+**/*.tsbuildinfo
 .env
 design/LANGUAGE_SERVER_PLAN.md

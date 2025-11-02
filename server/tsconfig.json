@@ -15,7 +15,10 @@
 		"forceConsistentCasingInFileNames": true,
 		"composite": true,
 		"declaration": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"paths": {
+			"@bloglsp/shared": ["../shared/out/index"]
+		}
 	},
 	"include": [
 		"src/**/*"

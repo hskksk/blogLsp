@@ -6,6 +6,14 @@
   "version": "0.1.0",
 	"publisher": "hskksk",
   "private": true,
+	"main": "./out/index.js",
+	"types": "./out/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./out/index.d.ts",
+			"default": "./out/index.js"
+		}
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/hskksk/blog_language_server"
@@ -17,7 +25,8 @@
 		"@langchain/core": "^0.3.0",
 		"@langchain/openai": "^0.3.0",
 		"glob": "^11.0.0",
-		"vscode-languageclient": "^9.0.1"
+		"vscode-languageclient": "^9.0.1",
+		"vscode-languageserver": "^9.0.1"
 	},
   "devDependencies": {
 		"@types/vscode": "^1.100.0",

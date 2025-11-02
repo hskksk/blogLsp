@@ -18,6 +18,8 @@ export function createLlmProvider(config: BlogLspConfig): LlmProvider {
     temperature: config.temperature,
     maxTokens: config.maxTokens,
     timeout: config.timeoutMs,
+    reasoningEffort: config.reasoningEffort,
+    verbosity: config.verbosity,
   };
 
   switch (config.provider.toLowerCase()) {

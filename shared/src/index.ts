@@ -5,8 +5,8 @@ export interface BlogLspConfig {
   model: string;
   apiBaseUrl?: string;
   apiKey?: string;
-  maxTokens: number;
-  temperature: number;
+  maxTokens?: number; // gpt-5系以前で使用（gpt-5系では使用しない）
+  temperature?: number; // gpt-5系以前で使用（gpt-5系では使用しない）
   numSuggestions: number;
   style: 'tech-blog' | 'casual' | 'formal';
   language: 'ja' | 'en';
@@ -15,6 +15,8 @@ export interface BlogLspConfig {
   };
   enableStreaming: boolean;
   timeoutMs: number;
+  reasoningEffort?: 'minimal' | 'low' | 'middle' | 'high'; // gpt-5系で使用
+  verbosity?: 'low' | 'middle' | 'high'; // gpt-5系で使用
 }
 
 export interface LlmProvider {
@@ -24,8 +26,8 @@ export interface LlmProvider {
     context: {
       prompt: string;
       language: 'ja' | 'en';
-      maxTokens: number;
-      temperature: number;
+      maxTokens?: number; // オプショナル（gpt-5系では使用しない）
+      temperature?: number; // オプショナル（gpt-5系では使用しない）
       numSuggestions: number;
     },
     signal?: AbortSignal
@@ -33,7 +35,7 @@ export interface LlmProvider {
 }
 
 export function buildSystemPrompt(style: BlogLspConfig['style'], language: BlogLspConfig['language']): string {
-  const base = 'You are an assistant for technical blog writing.';
+  const base = 'You are an assistant for technical blog writing in markdown format.';
   const styleText = style === 'tech-blog' ? 'Concise, clear, developer-friendly tone.' : style === 'formal' ? 'Formal, precise tone.' : 'Casual, friendly tone.';
   const langText = language === 'ja' ? 'Language: Japanese.' : 'Language: English.';
   return `${base} ${styleText} ${langText} Keep Markdown and code blocks untouched.`;
@@ -46,5 +48,15 @@ export {
   LangChainLlmProvider,
   OpenAILangChainProvider,
   AzureOpenAILangChainProvider,
+  isGpt5Series,
 } from './llm/providers';
+
+// Markdown extraction exports
+export { extractMarkdownContext, extractTextByScope } from './markdown/extractor';
+export { buildCompletionPrompt, buildHeadingSuggestionPrompt } from './markdown/prompt-builder';
+export { extractContextLines } from './markdown/context-extractor';
+export { buildCompletionItems } from './markdown/completion-item-builder';
+export type { MarkdownContext, ExtractionOptions, ExtractedText } from './markdown/types';
+export type { ContextLines, Position } from './markdown/context-extractor';
+export type { BuildCompletionItemsOptions } from './markdown/completion-item-builder';
 

@@ -13,6 +13,7 @@
 		"url": "https://github.com/hskksk/blog_language_server"
 	},
   "dependencies": {
+    "@bloglsp/shared": "file:../shared",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.11"
   },

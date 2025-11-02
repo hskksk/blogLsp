@@ -1,6 +1,6 @@
 {
   "blogLsp.provider": "openai",
-  "blogLsp.model": "gpt-4.1-mini",
+  "blogLsp.model": "gpt-4.1-nano",
   "blogLsp.apiBaseUrl": "https://api.openai.com/v1",
   "blogLsp.apiKey": "${env:OPENAI_API_KEY}",
   "blogLsp.maxTokens": 128,

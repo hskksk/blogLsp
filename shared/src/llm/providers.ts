@@ -7,9 +7,19 @@ export interface LangChainProviderConfig {
   model: string;
   apiKey?: string;
   apiBaseUrl?: string;
-  temperature: number;
-  maxTokens: number;
+  temperature?: number; // gpt-5系以前で使用
+  maxTokens?: number; // gpt-5系以前で使用（gpt-5系では使用しない）
   timeout?: number;
+  reasoningEffort?: 'minimal' | 'low' | 'middle' | 'high'; // gpt-5系で使用
+  verbosity?: 'low' | 'middle' | 'high'; // gpt-5系で使用
+}
+
+/**
+ * モデル名からgpt-5系かどうかを判定
+ */
+export function isGpt5Series(modelName: string): boolean {
+  // gpt-5, gpt-5o, gpt-5-mini など、gpt-5で始まるモデル名を判定
+  return /^gpt-5/i.test(modelName.trim());
 }
 
 /**
@@ -38,8 +48,8 @@ export abstract class LangChainLlmProvider implements LlmProvider {
     context: {
       prompt: string;
       language: 'ja' | 'en';
-      maxTokens: number;
-      temperature: number;
+      maxTokens?: number; // オプショナル（gpt-5系では使用しない）
+      temperature?: number; // オプショナル（gpt-5系では使用しない）
       numSuggestions: number;
     },
     signal?: AbortSignal
@@ -79,22 +89,32 @@ export class OpenAILangChainProvider extends LangChainLlmProvider {
   supportsStreaming = true;
 
   protected createModel(config: LangChainProviderConfig): BaseChatModel {
-    const modelConfig: {
-      modelName: string;
-      temperature: number;
-      maxTokens?: number;
-      openAIApiKey?: string;
-      configuration?: {
-        baseURL?: string;
-      };
-      timeout?: number;
-    } = {
+    const isGpt5 = isGpt5Series(config.model);
+    
+    // ChatOpenAIのコンストラクタパラメータを構築
+    const modelConfig: any = {
       modelName: config.model,
-      temperature: config.temperature,
     };
 
-    if (config.maxTokens) {
-      modelConfig.maxTokens = config.maxTokens;
+    // gpt-5系とそれ以前でパラメータを切り替え
+    if (isGpt5) {
+      // gpt-5系: reasoning_effortとverbosityを使用
+      if (config.reasoningEffort) {
+        modelConfig.reasoningEffort = config.reasoningEffort;
+      }
+      if (config.verbosity) {
+        modelConfig.verbosity = config.verbosity;
+      }
+      // temperatureとmaxTokensはgpt-5系では使用しない
+    } else {
+      // gpt-5系以前: temperatureとmaxTokensを使用
+      if (config.temperature !== undefined) {
+        modelConfig.temperature = config.temperature;
+      }
+      if (config.maxTokens) {
+        modelConfig.maxTokens = config.maxTokens;
+      }
+      // reasoning_effortとverbosityは使用しない
     }
 
     if (config.apiKey) {
@@ -111,7 +131,7 @@ export class OpenAILangChainProvider extends LangChainLlmProvider {
       modelConfig.timeout = config.timeout;
     }
 
-    return new ChatOpenAI(modelConfig);
+    return new ChatOpenAI(modelConfig) as BaseChatModel;
   }
 }
 
@@ -123,20 +143,32 @@ export class AzureOpenAILangChainProvider extends LangChainLlmProvider {
   supportsStreaming = true;
 
   protected createModel(config: LangChainProviderConfig): BaseChatModel {
-    const modelConfig: {
-      modelName: string;
-      temperature: number;
-      maxTokens?: number;
-      azureOpenAIApiKey?: string;
-      azureOpenAIApiInstanceName?: string;
-      azureOpenAIApiDeploymentName?: string;
-      azureOpenAIApiVersion?: string;
-      timeout?: number;
-    } = {
+    const isGpt5 = isGpt5Series(config.model);
+    
+    const modelConfig: any = {
       modelName: config.model,
-      temperature: config.temperature,
-      maxTokens: config.maxTokens,
     };
+
+    // gpt-5系とそれ以前でパラメータを切り替え
+    if (isGpt5) {
+      // gpt-5系: reasoning_effortとverbosityを使用
+      if (config.reasoningEffort) {
+        modelConfig.reasoningEffort = config.reasoningEffort;
+      }
+      if (config.verbosity) {
+        modelConfig.verbosity = config.verbosity;
+      }
+      // temperatureとmaxTokensはgpt-5系では使用しない
+    } else {
+      // gpt-5系以前: temperatureとmaxTokensを使用
+      if (config.temperature !== undefined) {
+        modelConfig.temperature = config.temperature;
+      }
+      if (config.maxTokens) {
+        modelConfig.maxTokens = config.maxTokens;
+      }
+      // reasoning_effortとverbosityは使用しない
+    }
 
     if (config.apiKey) {
       modelConfig.azureOpenAIApiKey = config.apiKey;
@@ -164,6 +196,6 @@ export class AzureOpenAILangChainProvider extends LangChainLlmProvider {
       modelConfig.timeout = config.timeout;
     }
 
-    return new ChatOpenAI(modelConfig);
+    return new ChatOpenAI(modelConfig) as BaseChatModel;
   }
 }

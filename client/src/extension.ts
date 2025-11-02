@@ -189,7 +189,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   client = new LanguageClient('blogLsp', 'Blog Markdown LSP', serverOptions, clientOptions);
   context.subscriptions.push(client);
   
-  // コマンドを登録
+  // コマンドを登録（package.jsonで宣言されているコマンドのハンドラーを実装）
+  // 注意: package.jsonで宣言されていないコマンドは、registerCommandで直接登録します
   const setApiKeyCommand = vscode.commands.registerCommand(
     'blogLsp.setApiKey',
     async () => {
@@ -215,6 +216,116 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
 
   context.subscriptions.push(setApiKeyCommand, deleteApiKeyCommand);
+
+  // LLM補完コマンドを登録（コマンドパレットからアクセス可能にする）
+  const completeSelectionCommand = vscode.commands.registerCommand(
+    'blogLsp.completeSelection',
+    async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showWarningMessage('No active editor');
+        return;
+      }
+
+      const selection = editor.selection;
+      if (selection.isEmpty) {
+        vscode.window.showWarningMessage('Please select text to complete');
+        return;
+      }
+
+      const document = editor.document;
+      const selectedText = document.getText(selection);
+
+      if (!client || !client.isRunning()) {
+        vscode.window.showErrorMessage('Language server is not running');
+        return;
+      }
+
+      try {
+        await client.sendRequest('workspace/executeCommand', {
+          command: 'bloglsp.completeSelection',
+          arguments: [
+            document.uri.toString(),
+            {
+              start: { line: selection.start.line, character: selection.start.character },
+              end: { line: selection.end.line, character: selection.end.character },
+            },
+            selectedText,
+          ],
+        });
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to complete selection: ${error}`);
+      }
+    }
+  );
+
+  const completeParagraphCommand = vscode.commands.registerCommand(
+    'blogLsp.completeParagraph',
+    async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showWarningMessage('No active editor');
+        return;
+      }
+
+      const position = editor.selection.active;
+      const document = editor.document;
+
+      if (!client || !client.isRunning()) {
+        vscode.window.showErrorMessage('Language server is not running');
+        return;
+      }
+
+      try {
+        await client.sendRequest('workspace/executeCommand', {
+          command: 'bloglsp.completeParagraph',
+          arguments: [
+            document.uri.toString(),
+            { line: position.line, character: position.character },
+          ],
+        });
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to complete paragraph: ${error}`);
+      }
+    }
+  );
+
+  const insertHeadingCommand = vscode.commands.registerCommand(
+    'blogLsp.insertHeading',
+    async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showWarningMessage('No active editor');
+        return;
+      }
+
+      const position = editor.selection.active;
+      const document = editor.document;
+
+      if (!client || !client.isRunning()) {
+        vscode.window.showErrorMessage('Language server is not running');
+        return;
+      }
+
+      try {
+        await client.sendRequest('workspace/executeCommand', {
+          command: 'bloglsp.insertHeading',
+          arguments: [
+            document.uri.toString(),
+            { line: position.line, character: position.character },
+          ],
+        });
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to insert heading: ${error}`);
+      }
+    }
+  );
+
+  context.subscriptions.push(
+    completeSelectionCommand,
+    completeParagraphCommand,
+    insertHeadingCommand
+  );
   
   // 設定変更を監視して、サーバー側に通知
   context.subscriptions.push(
@@ -230,7 +341,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   
   // 初回起動時のAPIキーチェック
   await checkApiKey(context);
-  
+
+  // サーバーが起動してからコマンドを登録
   await client.start();
 }
 

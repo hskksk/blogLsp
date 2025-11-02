@@ -29,6 +29,79 @@ function parseHeading(line: string): { isHeading: boolean; level: number; text: 
 }
 
 /**
+ * 見出し情報（レベル、テキスト、行番号）
+ */
+export interface HeadingInfo {
+  level: number;
+  text: string;
+  line: number;
+}
+
+/**
+ * 指定された行が見出しかどうかを判定し、情報を返す
+ */
+function getHeadingInfo(line: string, lineIndex: number): HeadingInfo | null {
+  const heading = parseHeading(line);
+  if (heading.isHeading) {
+    return {
+      level: heading.level,
+      text: heading.text,
+      line: lineIndex,
+    };
+  }
+  return null;
+}
+
+/**
+ * カーソル位置から最も近い見出しを検出
+ * カーソル位置より前の見出しを上方向に検索
+ * 
+ * @param text Markdownテキスト全体
+ * @param position カーソル位置
+ * @returns 見つかった見出し情報、見つからなければnull
+ */
+export function findNearestHeadingBefore(text: string, position: Position): HeadingInfo | null {
+  const lines = text.split(/\r\n|\r|\n/);
+  
+  // カーソル位置より前の行を逆順で検索
+  for (let i = position.line; i >= 0; i--) {
+    const headingInfo = getHeadingInfo(lines[i], i);
+    if (headingInfo) {
+      return headingInfo;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * カーソル位置を含む行が見出しかどうかを判定
+ */
+export function isHeadingAtPosition(text: string, position: Position): HeadingInfo | null {
+  const lines = text.split(/\r\n|\r|\n/);
+  if (position.line >= 0 && position.line < lines.length) {
+    return getHeadingInfo(lines[position.line], position.line);
+  }
+  return null;
+}
+
+/**
+ * 指定された見出しの次の見出しを検索
+ */
+export function findNextHeading(text: string, afterLine: number): HeadingInfo | null {
+  const lines = text.split(/\r\n|\r|\n/);
+  
+  for (let i = afterLine + 1; i < lines.length; i++) {
+    const headingInfo = getHeadingInfo(lines[i], i);
+    if (headingInfo) {
+      return headingInfo;
+    }
+  }
+  
+  return null;
+}
+
+/**
  * Markdownテキストから見出しを抽出してDocumentSymbolの配列を返す
  * 
  * @param text Markdownテキスト全体

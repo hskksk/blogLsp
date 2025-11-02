@@ -89,3 +89,30 @@ export function buildHeadingSuggestionPrompt(options: {
   });
 }
 
+/**
+ * 段落完成用のプロンプトを構築
+ */
+export function buildParagraphCompletionPrompt(options: PromptBuildingOptions): string {
+  const { currentText, linesBefore, linesAfter, config } = options;
+  const systemPrompt = buildSystemPrompt(config.style, config.language);
+  
+  // コンテキスト情報をJSON形式で構造化
+  const contextData: Record<string, unknown> = {};
+  
+  if (linesBefore.length > 0) {
+    contextData.linesBefore = linesBefore;
+  }
+  
+  contextData.currentText = currentText;
+  
+  if (linesAfter.length > 0) {
+    contextData.linesAfter = linesAfter;
+  }
+  
+  // テンプレートをレンダリング
+  return renderTemplate('paragraph-completion', {
+    systemPrompt,
+    contextJson: JSON.stringify(contextData, null, 2),
+  });
+}
+

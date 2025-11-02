@@ -8,6 +8,16 @@ import {
   InitializeResult,
   DidChangeConfigurationNotification,
   DocumentSymbolParams,
+  HoverParams,
+  Hover,
+  MarkupKind,
+  CodeActionParams,
+  CodeAction,
+  Command,
+  ExecuteCommandParams,
+  WorkspaceEdit,
+  TextEdit,
+  Range as LspRange,
 } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import type {
@@ -18,10 +28,15 @@ import {
   createLlmProvider,
   buildCompletionPrompt,
   buildHeadingSuggestionPrompt,
+  buildParagraphCompletionPrompt,
   extractContextLines,
   buildCompletionItems,
   buildHeadingCompletionItems,
   extractHeadings,
+  findNearestHeadingBefore,
+  isHeadingAtPosition,
+  findNextHeading,
+  type HeadingInfo,
 } from '@bloglsp/shared';
 
 const connection = createConnection(ProposedFeatures.all);
@@ -166,6 +181,19 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
         resolveProvider: false,
       },
       documentSymbolProvider: true,
+      hoverProvider: true,
+      codeActionProvider: {
+        resolveProvider: false,
+      },
+      /*
+      executeCommandProvider: {
+        commands: [
+          'bloglsp.completeSelection',
+          'bloglsp.completeParagraph',
+          'bloglsp.insertHeading',
+        ],
+      },
+      */
     },
   };
   return result;
@@ -334,6 +362,362 @@ connection.onDocumentSymbol(async (params: DocumentSymbolParams) => {
     connection.console.error(`Error extracting document symbols: ${error}`);
     
     // エラー時は空の配列を返す
+    return [];
+  }
+});
+
+/**
+ * ホバー情報を返す
+ */
+connection.onHover(async (params: HoverParams): Promise<Hover | null> => {
+  try {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      connection.console.warn(`Document not found: ${params.textDocument.uri}`);
+      return null;
+    }
+
+    const text = document.getText();
+    const position = params.position;
+
+    // カーソル位置の行が見出しかどうかを確認
+    const currentHeading = isHeadingAtPosition(text, position);
+    
+    if (currentHeading) {
+      // 見出し上にホバーした場合: 次の見出し情報も表示
+      const nextHeading = findNextHeading(text, currentHeading.line);
+      
+      const parts: string[] = [];
+      parts.push(`**見出しレベル ${currentHeading.level}**`);
+      parts.push('');
+      parts.push(currentHeading.text);
+      
+      if (nextHeading) {
+        parts.push('');
+        parts.push('---');
+        parts.push('');
+        parts.push('**次の見出し**:');
+        parts.push(`レベル ${nextHeading.level}: ${nextHeading.text}`);
+      } else {
+        parts.push('');
+        parts.push('_（この見出し以降に次の見出しはありません）_');
+      }
+      
+      return {
+        contents: {
+          kind: MarkupKind.Markdown,
+          value: parts.join('\n'),
+        },
+      };
+    } else {
+      // 通常テキスト上: 現在のセクション情報を表示
+      const nearestHeading = findNearestHeadingBefore(text, position);
+      
+      if (nearestHeading) {
+        const parts: string[] = [];
+        parts.push('**現在のセクション**');
+        parts.push('');
+        parts.push(`レベル ${nearestHeading.level}: ${nearestHeading.text}`);
+        
+        // 次の見出しも表示
+        const nextHeading = findNextHeading(text, nearestHeading.line);
+        if (nextHeading) {
+          parts.push('');
+          parts.push('---');
+          parts.push('');
+          parts.push('**次のセクション**:');
+          parts.push(`レベル ${nextHeading.level}: ${nextHeading.text}`);
+        }
+        
+        return {
+          contents: {
+            kind: MarkupKind.Markdown,
+            value: parts.join('\n'),
+          },
+        };
+      }
+    }
+    
+    // 見出しが見つからない場合はnullを返す（ホバー情報を表示しない）
+    return null;
+  } catch (error) {
+    connection.console.error(`Error generating hover information: ${error}`);
+    
+    // エラー時はnullを返す
+    return null;
+  }
+});
+
+/**
+ * コマンド実行ハンドラー
+ */
+connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
+  try {
+    if (!currentConfig || !llmProvider) {
+      connection.console.warn('Configuration or LLM provider not available');
+      await updateConfiguration();
+      
+      if (!currentConfig || !llmProvider) {
+        connection.window.showErrorMessage('Configuration or LLM provider not available');
+        return;
+      }
+    }
+
+    const command = params.command;
+    const args = params.arguments || [];
+
+    if (command === 'bloglsp.completeSelection') {
+      // 選択範囲の続きを生成
+      const uri = args[0] as string;
+      const range = args[1] as LspRange;
+      const selectedText = args[2] as string;
+
+      const document = documents.get(uri);
+      if (!document) {
+        connection.window.showErrorMessage(`Document not found: ${uri}`);
+        return;
+      }
+
+      const text = document.getText();
+      const context = extractContextLines(text, range.start, 5, 5);
+
+      const prompt = buildCompletionPrompt({
+        currentText: selectedText || context.currentText,
+        linesBefore: context.linesBefore,
+        linesAfter: context.linesAfter,
+        config: currentConfig,
+      });
+
+      const completions = await llmProvider.generateCompletions({
+        prompt,
+        language: currentConfig.language,
+        maxTokens: currentConfig.maxTokens,
+        temperature: currentConfig.temperature,
+        numSuggestions: 1,
+      });
+
+      if (completions.length === 0 || !completions[0]) {
+        connection.window.showInformationMessage('No completion generated');
+        return;
+      }
+
+      let completion = completions[0];
+      // currentTextを除去
+      const textToComplete = selectedText || context.currentText;
+      if (completion.startsWith(textToComplete)) {
+        completion = completion.substring(textToComplete.length);
+      }
+
+      if (!completion.trimEnd()) {
+        connection.window.showInformationMessage('Generated completion is empty');
+        return;
+      }
+
+      const edit: WorkspaceEdit = {
+        changes: {
+          [uri]: [
+            {
+              range: {
+                start: range.end,
+                end: range.end,
+              },
+              newText: completion,
+            },
+          ],
+        },
+      };
+
+      await connection.workspace.applyEdit(edit);
+
+    } else if (command === 'bloglsp.completeParagraph') {
+      // 段落を完成させる
+      const uri = args[0] as string;
+      const position = args[1] as { line: number; character: number };
+
+      const document = documents.get(uri);
+      if (!document) {
+        connection.window.showErrorMessage(`Document not found: ${uri}`);
+        return;
+      }
+
+      const text = document.getText();
+      const pos = { line: position.line, character: position.character };
+      const context = extractContextLines(text, pos, 5, 5);
+
+      const prompt = buildParagraphCompletionPrompt({
+        currentText: context.currentText,
+        linesBefore: context.linesBefore,
+        linesAfter: context.linesAfter,
+        config: currentConfig,
+      });
+
+      const completions = await llmProvider.generateCompletions({
+        prompt,
+        language: currentConfig.language,
+        maxTokens: currentConfig.maxTokens ? currentConfig.maxTokens * 2 : undefined, // より長いテキストを生成
+        temperature: currentConfig.temperature,
+        numSuggestions: 1,
+      });
+
+      if (completions.length === 0 || !completions[0]) {
+        connection.window.showInformationMessage('No completion generated');
+        return;
+      }
+
+      let completion = completions[0];
+      // currentTextを除去
+      if (completion.startsWith(context.currentText)) {
+        completion = completion.substring(context.currentText.length);
+      }
+
+      if (!completion.trimEnd()) {
+        connection.window.showInformationMessage('Generated completion is empty');
+        return;
+      }
+
+      const edit: WorkspaceEdit = {
+        changes: {
+          [uri]: [
+            {
+              range: {
+                start: pos,
+                end: pos,
+              },
+              newText: completion,
+            },
+          ],
+        },
+      };
+
+      await connection.workspace.applyEdit(edit);
+
+    } else if (command === 'bloglsp.insertHeading') {
+      // 見出し候補を挿入
+      const uri = args[0] as string;
+      const position = args[1] as { line: number; character: number };
+
+      const document = documents.get(uri);
+      if (!document) {
+        connection.window.showErrorMessage(`Document not found: ${uri}`);
+        return;
+      }
+
+      const text = document.getText();
+      const pos = { line: position.line, character: position.character };
+      const context = extractContextLines(text, pos, 5, 5);
+
+      const prompt = buildHeadingSuggestionPrompt({
+        linesBefore: context.linesBefore,
+        currentLine: context.currentLine,
+        linesAfter: context.linesAfter,
+        config: currentConfig,
+      });
+
+      const headings = await llmProvider.generateCompletions({
+        prompt,
+        language: currentConfig.language,
+        maxTokens: currentConfig.maxTokens,
+        temperature: currentConfig.temperature,
+        numSuggestions: 1,
+      });
+
+      if (headings.length === 0 || !headings[0]) {
+        connection.window.showInformationMessage('No heading suggestion generated');
+        return;
+      }
+
+      let headingText = headings[0].trim();
+      // currentTextから#を抽出
+      const headingPrefix = context.currentText.match(/^#+\s*/)?.[0] || '# ';
+      const fullHeading = headingPrefix + headingText;
+
+      const edit: WorkspaceEdit = {
+        changes: {
+          [uri]: [
+            {
+              range: {
+                start: { line: pos.line, character: 0 },
+                end: pos,
+              },
+              newText: fullHeading,
+            },
+          ],
+        },
+      };
+
+      await connection.workspace.applyEdit(edit);
+    }
+  } catch (error) {
+    connection.console.error(`Error executing command: ${error}`);
+    connection.window.showErrorMessage(`Error executing command: ${error}`);
+  }
+});
+
+/**
+ * コードアクションハンドラー
+ */
+connection.onCodeAction(async (params: CodeActionParams) => {
+  try {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return [];
+    }
+
+    const actions: CodeAction[] = [];
+    const range = params.range;
+
+    // 選択範囲がある場合
+    if (range.start.line !== range.end.line || range.start.character !== range.end.character) {
+      const selectedText = document.getText(range);
+      
+      // 「続きを生成」アクション
+      actions.push({
+        title: '続きを生成',
+        kind: 'source.fixAll',
+        command: {
+          command: 'bloglsp.completeSelection',
+          title: '続きを生成',
+          arguments: [params.textDocument.uri, range, selectedText],
+        },
+      });
+    } else {
+      // カーソル位置のみの場合
+      const position = range.start;
+      const line = document.getText({
+        start: { line: position.line, character: 0 },
+        end: { line: position.line, character: Number.MAX_SAFE_INTEGER },
+      });
+
+      // 段落完成アクション（空行でない場合）
+      if (line.trim().length > 0) {
+        actions.push({
+          title: '段落を完成',
+          kind: 'source.fixAll',
+          command: {
+            command: 'bloglsp.completeParagraph',
+            title: '段落を完成',
+            arguments: [params.textDocument.uri, position],
+          },
+        });
+      }
+
+      // 見出し候補を挿入（現在行が#で始まる、または空行の場合）
+      if (line.trim().startsWith('#') || line.trim().length === 0) {
+        actions.push({
+          title: '見出し候補を挿入',
+          kind: 'source.fixAll',
+          command: {
+            command: 'bloglsp.insertHeading',
+            title: '見出し候補を挿入',
+            arguments: [params.textDocument.uri, position],
+          },
+        });
+      }
+    }
+
+    return actions;
+  } catch (error) {
+    connection.console.error(`Error generating code actions: ${error}`);
     return [];
   }
 });

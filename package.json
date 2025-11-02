@@ -42,6 +42,21 @@
 				"command": "blogLsp.deleteApiKey",
 				"title": "Delete API Key",
 				"category": "Blog LSP"
+			},
+			{
+				"command": "blogLsp.completeSelection",
+				"title": "Complete Selection",
+				"category": "Blog LSP"
+			},
+			{
+				"command": "blogLsp.completeParagraph",
+				"title": "Complete Paragraph",
+				"category": "Blog LSP"
+			},
+			{
+				"command": "blogLsp.insertHeading",
+				"title": "Insert Heading",
+				"category": "Blog LSP"
 			}
 		],
 		"configuration": {

@@ -7,6 +7,7 @@ import {
   InitializeParams,
   InitializeResult,
   DidChangeConfigurationNotification,
+  DocumentSymbolParams,
 } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import type {
@@ -20,6 +21,7 @@ import {
   extractContextLines,
   buildCompletionItems,
   buildHeadingCompletionItems,
+  extractHeadings,
 } from '@bloglsp/shared';
 
 const connection = createConnection(ProposedFeatures.all);
@@ -163,6 +165,7 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
         triggerCharacters: ['\n', '.', ' ', '#'],
         resolveProvider: false,
       },
+      documentSymbolProvider: true,
     },
   };
   return result;
@@ -304,6 +307,31 @@ connection.onCompletion(async (params: CompletionParams) => {
     return completionItems;
   } catch (error) {
     connection.console.error(`Error generating completions: ${error}`);
+    
+    // エラー時は空の配列を返す
+    return [];
+  }
+});
+
+/**
+ * ドキュメントシンボル（見出し階層）を返す
+ */
+connection.onDocumentSymbol(async (params: DocumentSymbolParams) => {
+  try {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      connection.console.warn(`Document not found: ${params.textDocument.uri}`);
+      return [];
+    }
+
+    const text = document.getText();
+    const symbols = extractHeadings(text);
+
+    connection.console.log(`Extracted ${symbols.length} heading symbols`);
+    
+    return symbols;
+  } catch (error) {
+    connection.console.error(`Error extracting document symbols: ${error}`);
     
     // エラー時は空の配列を返す
     return [];

@@ -61,6 +61,7 @@ export { extractMarkdownContext, extractTextByScope } from './markdown/extractor
 export { buildCompletionPrompt, buildHeadingSuggestionPrompt } from './markdown/prompt-builder';
 export { extractContextLines } from './markdown/context-extractor';
 export { buildCompletionItems, buildHeadingCompletionItems } from './markdown/completion-item-builder';
+export { extractHeadings } from './markdown/heading-extractor';
 export type { MarkdownContext, ExtractionOptions, ExtractedText } from './markdown/types';
 export type { ContextLines, Position } from './markdown/context-extractor';
 export type { BuildCompletionItemsOptions } from './markdown/completion-item-builder';

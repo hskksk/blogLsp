@@ -1,5 +1,5 @@
 {
-  "name": "@bloglsp/shared",
+  "name": "@blogLsp/shared",
   "description": "Shared types and utilities for blog language server",
   "author": "hskksk",
   "license": "MIT",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hskksk/blog_language_server"
+    "url": "https://github.com/hskksk/blogLsp"
   },
   "engines": {
     "vscode": "^1.100.0"

@@ -1,5 +1,5 @@
 {
-  "name": "@bloglsp/client",
+  "name": "@blogLsp/client",
   "displayName": "Blog Markdown LSP",
   "description": "Markdown editing assistant with LLM completions",
   "version": "0.1.0",
@@ -8,7 +8,7 @@
   "publisher": "hskksk",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/hskksk/blog_language_server"
+		"url": "https://github.com/hskksk/blogLsp"
 	},
   "engines": {
 		"vscode": "^1.99.0"

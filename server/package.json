@@ -1,5 +1,5 @@
 {
-  "name": "@bloglsp/server",
+  "name": "@blogLsp/server",
 	"description": "Language server implementation for blog markdown editing with LLM completions",
   "version": "0.1.0",
   "private": true,
@@ -10,10 +10,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/hskksk/blog_language_server"
+		"url": "https://github.com/hskksk/blogLsp"
 	},
   "dependencies": {
-    "@bloglsp/shared": "file:../shared",
+    "@blogLsp/shared": "file:../shared",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.11"
   },

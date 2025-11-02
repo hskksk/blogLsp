@@ -23,7 +23,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import type {
   BlogLspConfig,
   LlmProvider,
-} from '@bloglsp/shared';
+} from '@blogLsp/shared';
 import {
   createLlmProvider,
   buildCompletionPrompt,
@@ -37,7 +37,7 @@ import {
   isHeadingAtPosition,
   findNextHeading,
   type HeadingInfo,
-} from '@bloglsp/shared';
+} from '@blogLsp/shared';
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -250,9 +250,9 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
       /*
       executeCommandProvider: {
         commands: [
-          'bloglsp.completeSelection',
-          'bloglsp.completeParagraph',
-          'bloglsp.insertHeading',
+          'blogLsp.completeSelection',
+          'blogLsp.completeParagraph',
+          'blogLsp.insertHeading',
         ],
       },
       */
@@ -537,7 +537,7 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
     const commandSettings = await getCommandSettings();
     const completionSettings = await getCompletionSettings();
 
-    if (command === 'bloglsp.completeSelection') {
+    if (command === 'blogLsp.completeSelection') {
       // 選択範囲の続きを生成
       const uri = args[0] as string;
       const range = args[1] as LspRange;
@@ -600,7 +600,7 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
 
       await connection.workspace.applyEdit(edit);
 
-    } else if (command === 'bloglsp.completeParagraph') {
+    } else if (command === 'blogLsp.completeParagraph') {
       // 設定で無効化されている場合はエラー
       if (!commandSettings.enableParagraphCompletion) {
         connection.window.showWarningMessage('Paragraph completion is disabled in settings');
@@ -667,7 +667,7 @@ connection.onExecuteCommand(async (params: ExecuteCommandParams) => {
 
       await connection.workspace.applyEdit(edit);
 
-    } else if (command === 'bloglsp.insertHeading') {
+    } else if (command === 'blogLsp.insertHeading') {
       // 設定で無効化されている場合はエラー
       if (!commandSettings.enableHeadingGeneration) {
         connection.window.showWarningMessage('Heading generation is disabled in settings');
@@ -759,7 +759,7 @@ connection.onCodeAction(async (params: CodeActionParams) => {
         title: '続きを生成',
         kind: 'source.fixAll',
         command: {
-          command: 'bloglsp.completeSelection',
+          command: 'blogLsp.completeSelection',
           title: '続きを生成',
           arguments: [params.textDocument.uri, range, selectedText],
         },
@@ -778,7 +778,7 @@ connection.onCodeAction(async (params: CodeActionParams) => {
           title: '段落を完成',
           kind: 'source.fixAll',
           command: {
-            command: 'bloglsp.completeParagraph',
+            command: 'blogLsp.completeParagraph',
             title: '段落を完成',
             arguments: [params.textDocument.uri, position],
           },
@@ -791,7 +791,7 @@ connection.onCodeAction(async (params: CodeActionParams) => {
           title: '見出し候補を挿入',
           kind: 'source.fixAll',
           command: {
-            command: 'bloglsp.insertHeading',
+            command: 'blogLsp.insertHeading',
             title: '見出し候補を挿入',
             arguments: [params.textDocument.uri, position],
           },

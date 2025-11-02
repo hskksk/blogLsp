@@ -17,7 +17,7 @@
 		"declaration": true,
 		"resolveJsonModule": true,
 		"paths": {
-			"@bloglsp/shared": ["../shared/out/index"]
+			"@blogLsp/shared": ["../shared/out/index"]
 		}
 	},
 	"include": [

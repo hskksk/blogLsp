@@ -243,7 +243,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
       try {
         await client.sendRequest('workspace/executeCommand', {
-          command: 'bloglsp.completeSelection',
+          command: 'blogLsp.completeSelection',
           arguments: [
             document.uri.toString(),
             {
@@ -278,7 +278,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
       try {
         await client.sendRequest('workspace/executeCommand', {
-          command: 'bloglsp.completeParagraph',
+          command: 'blogLsp.completeParagraph',
           arguments: [
             document.uri.toString(),
             { line: position.line, character: position.character },
@@ -309,7 +309,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
       try {
         await client.sendRequest('workspace/executeCommand', {
-          command: 'bloglsp.insertHeading',
+          command: 'blogLsp.insertHeading',
           arguments: [
             document.uri.toString(),
             { line: position.line, character: position.character },

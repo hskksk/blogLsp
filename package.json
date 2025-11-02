@@ -1,5 +1,5 @@
 {
-  "name": "bloglsp",
+  "name": "blogLsp",
   "private": true,
 	"author": "hskksk",
 	"license": "MIT",
@@ -9,7 +9,7 @@
 	"main": "./client/out/extension",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/hskksk/bloglsp"
+		"url": "https://github.com/hskksk/blogLsp"
 	},
   "engines": {
 		"vscode": "^1.99.0"

@@ -46,10 +46,16 @@ export function buildSystemPrompt(
 ): string {
   const languageText = language === 'ja' ? 'Language: Japanese.' : 'Language: English.';
 
+  // When stylePrompt is not provided, use default style guide template
+  const effectiveStylePrompt =
+    stylePrompt && stylePrompt.trim().length > 0
+      ? stylePrompt
+      : renderTemplate('style-default', {});
+
   return renderTemplate('system', {
     languageText,
-    stylePrompt,
-    hasStylePrompt: Boolean(stylePrompt && stylePrompt.trim().length > 0),
+    stylePrompt: effectiveStylePrompt,
+    hasStylePrompt: Boolean(effectiveStylePrompt && effectiveStylePrompt.trim().length > 0),
   }).trim();
 }
 

@@ -112,8 +112,21 @@ export class ConfigurationManager {
       // Merge workspace file settings with precedence: TOML > YAML > VS Code
       if (this.workspaceLoader) {
         const ws = this.workspaceLoader.load();
-        if (ws?.stylePrompt) {
-          blogLspConfig.stylePrompt = ws.stylePrompt;
+        if (ws) {
+          if (ws.stylePrompt) blogLspConfig.stylePrompt = ws.stylePrompt;
+          if (ws.provider) blogLspConfig.provider = ws.provider;
+          if (ws.model) blogLspConfig.model = ws.model;
+          if (ws.apiBaseUrl) blogLspConfig.apiBaseUrl = ws.apiBaseUrl;
+          if (typeof ws.maxTokens === 'number') blogLspConfig.maxTokens = ws.maxTokens;
+          if (typeof ws.temperature === 'number') blogLspConfig.temperature = ws.temperature;
+          if (typeof ws.numSuggestions === 'number') blogLspConfig.numSuggestions = ws.numSuggestions;
+          if (ws.style) blogLspConfig.style = ws.style as BlogLspConfig['style'];
+          if (ws.language) blogLspConfig.language = ws.language as BlogLspConfig['language'];
+          if (ws.privacy?.scope) blogLspConfig.privacy.scope = ws.privacy.scope as BlogLspConfig['privacy']['scope'];
+          if (typeof ws.enableStreaming === 'boolean') blogLspConfig.enableStreaming = ws.enableStreaming;
+          if (typeof ws.timeoutMs === 'number') blogLspConfig.timeoutMs = ws.timeoutMs;
+          if (ws.reasoningEffort) blogLspConfig.reasoningEffort = ws.reasoningEffort as NonNullable<BlogLspConfig['reasoningEffort']>;
+          if (ws.verbosity) blogLspConfig.verbosity = ws.verbosity as NonNullable<BlogLspConfig['verbosity']>;
         }
       }
 
@@ -238,10 +251,20 @@ export class ConfigurationManager {
 
     try {
       const config = await this.connection.workspace.getConfiguration('blogLsp');
-      return {
+      let settings: CommandSettings = {
         enableHeadingGeneration: config.commands?.enableHeadingGeneration ?? true,
         enableParagraphCompletion: config.commands?.enableParagraphCompletion ?? true,
       };
+      if (this.workspaceLoader) {
+        const ws = this.workspaceLoader.load();
+        if (ws?.commands) {
+          settings = {
+            enableHeadingGeneration: ws.commands.enableHeadingGeneration ?? settings.enableHeadingGeneration,
+            enableParagraphCompletion: ws.commands.enableParagraphCompletion ?? settings.enableParagraphCompletion,
+          };
+        }
+      }
+      return settings;
     } catch (error) {
       this.connection.console.error(`Failed to get command settings: ${error}`);
       return {

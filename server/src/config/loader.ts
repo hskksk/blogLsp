@@ -4,11 +4,31 @@ import yaml from 'yaml';
 import toml from 'toml';
 
 export interface WorkspaceConfigData {
+  // Overrides for top-level BlogLspConfig (except apiKey)
+  provider?: string;
+  model?: string;
+  apiBaseUrl?: string;
+  maxTokens?: number;
+  temperature?: number;
+  numSuggestions?: number;
+  style?: 'tech-blog' | 'casual' | 'formal';
   stylePrompt?: string;
+  language?: 'ja' | 'en';
+  privacy?: { scope?: 'selection' | 'paragraph' | 'document' };
+  enableStreaming?: boolean;
+  timeoutMs?: number;
+  reasoningEffort?: 'minimal' | 'low' | 'middle' | 'high';
+  verbosity?: 'low' | 'middle' | 'high';
+
+  // Feature sections
   completion?: {
     maxTextSuggestions?: number;
     maxHeadingSuggestions?: number;
     triggerOnHeading?: boolean;
+  };
+  commands?: {
+    enableHeadingGeneration?: boolean;
+    enableParagraphCompletion?: boolean;
   };
 }
 
@@ -60,6 +80,25 @@ export class WorkspaceConfigLoader {
       result.stylePrompt = stylePrompt;
     }
 
+    // top-level overrides
+    if (typeof parsed?.provider === 'string') result.provider = parsed.provider;
+    if (typeof parsed?.model === 'string') result.model = parsed.model;
+    if (typeof parsed?.apiBaseUrl === 'string') result.apiBaseUrl = parsed.apiBaseUrl;
+    if (typeof parsed?.maxTokens === 'number') result.maxTokens = parsed.maxTokens;
+    if (typeof parsed?.temperature === 'number') result.temperature = parsed.temperature;
+    if (typeof parsed?.numSuggestions === 'number') result.numSuggestions = parsed.numSuggestions;
+    if (typeof parsed?.style === 'string') result.style = parsed.style;
+    if (typeof parsed?.language === 'string') result.language = parsed.language;
+    if (typeof parsed?.enableStreaming === 'boolean') result.enableStreaming = parsed.enableStreaming;
+    if (typeof parsed?.timeoutMs === 'number') result.timeoutMs = parsed.timeoutMs;
+    if (typeof parsed?.reasoningEffort === 'string') result.reasoningEffort = parsed.reasoningEffort;
+    if (typeof parsed?.verbosity === 'string') result.verbosity = parsed.verbosity;
+    if (parsed?.privacy && typeof parsed.privacy === 'object') {
+      const scope = parsed.privacy.scope;
+      result.privacy = result.privacy || {};
+      if (typeof scope === 'string') result.privacy.scope = scope;
+    }
+
     // completion.* passthrough (validated later by consumer)
     const completion = parsed?.completion ?? {};
     const outCompletion: WorkspaceConfigData['completion'] = {};
@@ -74,6 +113,19 @@ export class WorkspaceConfigLoader {
     }
     if (Object.keys(outCompletion).length > 0) {
       result.completion = outCompletion;
+    }
+
+    // commands.* passthrough
+    const commands = parsed?.commands ?? {};
+    const outCommands: WorkspaceConfigData['commands'] = {};
+    if (typeof commands.enableHeadingGeneration === 'boolean') {
+      outCommands.enableHeadingGeneration = commands.enableHeadingGeneration;
+    }
+    if (typeof commands.enableParagraphCompletion === 'boolean') {
+      outCommands.enableParagraphCompletion = commands.enableParagraphCompletion;
+    }
+    if (Object.keys(outCommands).length > 0) {
+      result.commands = outCommands;
     }
 
     return result;

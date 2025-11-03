@@ -71,10 +71,13 @@
           "type": "string",
           "enum": [
             "openai",
+            "openai-compatible",
+            "local-openai",
+            "local",
             "azure-openai"
           ],
           "default": "openai",
-          "description": "LLM provider to use for text completion."
+          "description": "LLM provider. Use openai-compatible/local(-openai) with custom blogLsp.apiBaseUrl."
         },
         "blogLsp.model": {
           "scope": "window",
@@ -86,13 +89,13 @@
           "scope": "window",
           "type": "string",
           "default": "https://api.openai.com/v1",
-          "description": "API base URL for the LLM provider. Leave empty to use the default URL for the provider."
+          "description": "API base URL for the LLM provider. Required for openai-compatible/local(-openai). Use http://localhost:11434/v1 for local OpenAI-compatible servers."
         },
         "blogLsp.apiKey": {
           "scope": "window",
           "type": "string",
           "default": "${env:OPENAI_API_KEY}",
-          "description": "API key for the LLM provider. You can use ${env:VAR_NAME} to reference environment variables."
+          "description": "API key for the LLM provider (Bearer). Optional when provider is openai-compatible/local(-openai) or apiBaseUrl points to localhost. Supports ${env:VAR_NAME}."
         },
         "blogLsp.maxTokens": {
           "scope": "window",

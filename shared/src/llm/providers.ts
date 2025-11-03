@@ -127,6 +127,16 @@ export class OpenAILangChainProvider extends LangChainLlmProvider {
       };
     }
 
+    // LangChain's ChatOpenAI requires an API key at construction time.
+    // For localhost OpenAI-compatible endpoints that do not require a key,
+    // provide a harmless placeholder when none is configured.
+    if (!modelConfig.openAIApiKey && modelConfig.configuration?.baseURL) {
+      const base: string = modelConfig.configuration.baseURL as string;
+      if (/^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?\//i.test(base)) {
+        modelConfig.openAIApiKey = 'unused-localhost-key';
+      }
+    }
+
     if (config.timeout) {
       modelConfig.timeout = config.timeout;
     }

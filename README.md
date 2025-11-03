@@ -32,3 +32,22 @@ Notes:
 - API key is optional when using `openai-compatible`/`local*` providers or when `LLM_API_BASE_URL` points to localhost.
 - Streaming is currently disabled in the test script.
 
+### VS Code settings.json example
+
+Add the following to your user or workspace settings to use a local OpenAI-compatible endpoint:
+
+```json
+{
+  "blogLsp.provider": "openai-compatible",
+  "blogLsp.apiBaseUrl": "http://localhost:11434/v1",
+  "blogLsp.model": "gpt-4o-mini",
+  "blogLsp.apiKey": "${env:OPENAI_API_KEY}" // optional for localhost
+}
+```
+
+CLI example for the test script:
+
+```bash
+LLM_PROVIDER=openai-compatible LLM_API_BASE_URL=http://localhost:11434/v1 npm -w shared run test:llm
+```
+

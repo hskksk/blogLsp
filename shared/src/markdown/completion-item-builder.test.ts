@@ -153,7 +153,9 @@ describe('completion-item-builder.ts', () => {
       assert.equal(result[1].label, '# Another Heading');
       assert.equal(result[0].kind, CompletionItemKind.Class);
       assert.ok(result[0].textEdit);
-      assert.equal(result[0].textEdit!.range.start.character, 0);
+      const textEdit = result[0].textEdit! as any;
+      assert.ok('range' in textEdit);
+      assert.equal(textEdit.range.start.character, 0);
     });
 
     it('should preserve heading level prefix', () => {

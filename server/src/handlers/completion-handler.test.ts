@@ -121,7 +121,7 @@ More content.`
         const result = await completionHandler.handleCompletion(params);
 
         assert.equal(result.length, 0);
-        assert.ok(mockConnection.console!.warn!.called);
+        assert.ok((mockConnection.console!.warn as sinon.SinonStub).called);
       });
 
       it('should handle heading completion when trigger character is #', async () => {
@@ -262,7 +262,7 @@ More content.`
         const result = await completionHandler.handleCompletion(params);
 
         assert.equal(result.length, 0);
-        assert.ok(mockConnection.console!.error!.called);
+        assert.ok((mockConnection.console!.error as sinon.SinonStub).called);
       });
     });
   });

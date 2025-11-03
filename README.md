@@ -1,53 +1,75 @@
 ## Blog Markdown Language Server
 
-- packages/client: VS Code extension (Language Client)
-- packages/server: LSP server for Markdown completions
-- packages/shared: Shared types and utilities
+AI-assisted Language Server for Markdown blogging. Clean APIs, TypeScript-first, and easy to run locally or with OpenAI‑compatible providers. Inspired by the concise, user-friendly style of Hono's README [`honojs/hono`](https://github.com/honojs/hono).
 
-Build all:
+### Quick Start
 
 ```bash
+# Install deps (monorepo workspaces)
+npm install
+
+# Build all packages
 npm run build
+
+# (Optional) Run LLM test script against local/OpenAI-compatible endpoint
+npm -w shared run test:llm
 ```
 
-### Local/OpenAI-Compatible Providers
+### Features
 
-You can run against a local OpenAI-compatible server (e.g., Ollama `/v1`). Use the new provider ids `openai-compatible`, `local-openai`, or `local`, which reuse the OpenAI provider with `apiBaseUrl`.
+- **Markdown completions**: headings, paragraphs, and context-aware suggestions
+- **Hover & symbols**: helpful hover info and document symbols for navigation
+- **Code actions & commands**: quick-fixes and writer utilities
+- **Local or cloud LLMs**: OpenAI-compatible (incl. Ollama `/v1`) via a single config
+- **Monorepo**: clear separation of client, server, and shared logic
 
-Example environment for the test script:
+### Packages
+
+- `client`: VS Code extension (Language Client)
+- `server`: LSP server for Markdown completions and features
+- `shared`: Shared types, LLM providers, and Markdown utilities
+
+### Configuration
+
+Use a local OpenAI-compatible server (e.g., Ollama) by setting provider and base URL. Works without an API key when pointing to localhost.
 
 ```bash
 # Local Ollama OpenAI-compatible endpoint
 export LLM_PROVIDER=openai-compatible
 export LLM_MODEL="llama3.1:8b"
 export LLM_API_BASE_URL="http://localhost:11434/v1"
-
 # Optional: some servers require a dummy key
 # export LLM_API_KEY=dummy
 
 npm -w shared run test:llm
 ```
 
-Notes:
-- API key is optional when using `openai-compatible`/`local*` providers or when `LLM_API_BASE_URL` points to localhost.
-- Streaming is currently disabled in the test script.
-
-### VS Code settings.json example
-
-Add the following to your user or workspace settings to use a local OpenAI-compatible endpoint:
+VS Code `settings.json` example:
 
 ```json
 {
   "blogLsp.provider": "openai-compatible",
   "blogLsp.apiBaseUrl": "http://localhost:11434/v1",
   "blogLsp.model": "gpt-4o-mini",
-  "blogLsp.apiKey": "${env:OPENAI_API_KEY}" // optional for localhost
+  "blogLsp.apiKey": "${env:OPENAI_API_KEY}"
 }
 ```
 
-CLI example for the test script:
+CLI one-liner for the test script:
 
 ```bash
 LLM_PROVIDER=openai-compatible LLM_API_BASE_URL=http://localhost:11434/v1 npm -w shared run test:llm
 ```
 
+### Examples
+
+- Markdown: `examples/sample.md`
+- Config template: `examples/.blog-lsp.sample.toml`
+
+### Contributing
+
+Issues and PRs are welcome. Please keep code readable and prefer TypeScript types over comments.
+
+### License
+
+MIT © Contributors

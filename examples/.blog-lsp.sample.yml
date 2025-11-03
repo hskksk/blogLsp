@@ -7,7 +7,6 @@ apiBaseUrl: https://api.openai.com/v1
 maxTokens: 256
 temperature: 0.3
 numSuggestions: 2
-style: tech-blog   # one of: tech-blog, casual, formal
 language: en       # one of: ja, en
 enableStreaming: true
 timeoutMs: 50000

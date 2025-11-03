@@ -11,7 +11,6 @@ export interface WorkspaceConfigData {
   maxTokens?: number;
   temperature?: number;
   numSuggestions?: number;
-  style?: 'tech-blog' | 'casual' | 'formal';
   stylePrompt?: string;
   language?: 'ja' | 'en';
   privacy?: { scope?: 'selection' | 'paragraph' | 'document' };
@@ -87,7 +86,6 @@ export class WorkspaceConfigLoader {
     if (typeof parsed?.maxTokens === 'number') result.maxTokens = parsed.maxTokens;
     if (typeof parsed?.temperature === 'number') result.temperature = parsed.temperature;
     if (typeof parsed?.numSuggestions === 'number') result.numSuggestions = parsed.numSuggestions;
-    if (typeof parsed?.style === 'string') result.style = parsed.style;
     if (typeof parsed?.language === 'string') result.language = parsed.language;
     if (typeof parsed?.enableStreaming === 'boolean') result.enableStreaming = parsed.enableStreaming;
     if (typeof parsed?.timeoutMs === 'number') result.timeoutMs = parsed.timeoutMs;

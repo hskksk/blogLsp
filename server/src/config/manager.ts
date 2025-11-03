@@ -120,7 +120,6 @@ export class ConfigurationManager {
           if (typeof ws.maxTokens === 'number') blogLspConfig.maxTokens = ws.maxTokens;
           if (typeof ws.temperature === 'number') blogLspConfig.temperature = ws.temperature;
           if (typeof ws.numSuggestions === 'number') blogLspConfig.numSuggestions = ws.numSuggestions;
-          if (ws.style) blogLspConfig.style = ws.style as BlogLspConfig['style'];
           if (ws.language) blogLspConfig.language = ws.language as BlogLspConfig['language'];
           if (ws.privacy?.scope) blogLspConfig.privacy.scope = ws.privacy.scope as BlogLspConfig['privacy']['scope'];
           if (typeof ws.enableStreaming === 'boolean') blogLspConfig.enableStreaming = ws.enableStreaming;

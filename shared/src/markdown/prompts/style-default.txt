@@ -1,0 +1,8 @@
+Default technical blog style guide:
+- Audience: software engineers
+- Be concise and precise
+- Prefer clear, active voice
+- Provide minimal, runnable code samples
+- Keep Markdown and code blocks unchanged
+- Avoid unnecessary adjectives
+- Use consistent terminology

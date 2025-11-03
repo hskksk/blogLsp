@@ -33,8 +33,8 @@ export interface PromptBuildingOptions {
  */
 export function buildCompletionPrompt(options: PromptBuildingOptions): string {
   const { currentText, linesBefore, linesAfter, config } = options;
-  const systemPrompt = buildSystemPrompt(config.style, config.language);
-  
+  let systemPrompt = buildSystemPrompt(config.language, config.stylePrompt);
+
   // コンテキスト情報をJSON形式で構造化
   const contextData: Record<string, unknown> = {};
   
@@ -65,7 +65,7 @@ export function buildHeadingSuggestionPrompt(options: {
   config: BlogLspConfig;
 }): string {
   const { linesBefore, currentLine, linesAfter, config } = options;
-  const systemPrompt = buildSystemPrompt(config.style, config.language);
+  let systemPrompt = buildSystemPrompt(config.language, config.stylePrompt);
   
   // コンテキスト情報をJSON形式で構造化
   const contextData: Record<string, unknown> = {};
@@ -94,7 +94,7 @@ export function buildHeadingSuggestionPrompt(options: {
  */
 export function buildParagraphCompletionPrompt(options: PromptBuildingOptions): string {
   const { currentText, linesBefore, linesAfter, config } = options;
-  const systemPrompt = buildSystemPrompt(config.style, config.language);
+  let systemPrompt = buildSystemPrompt(config.language, config.stylePrompt);
   
   // コンテキスト情報をJSON形式で構造化
   const contextData: Record<string, unknown> = {};

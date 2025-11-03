@@ -48,6 +48,27 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
 
   configManager.setConfigurationCapability(hasConfigurationCapability);
 
+  // Determine workspace root path and pass to ConfigurationManager
+  try {
+    const rootUri = params.workspaceFolders?.[0]?.uri || params.rootUri;
+    if (rootUri) {
+      let rootPath = '';
+      if (rootUri.startsWith('file://')) {
+        // Decode file URI to path
+        rootPath = decodeURIComponent(rootUri.replace('file://', ''));
+      } else {
+        // Fallback: attempt URL parsing
+        rootPath = decodeURIComponent(new URL(rootUri).pathname);
+      }
+      if (rootPath) {
+        configManager.setWorkspaceRoot(rootPath);
+        connection.console.log(`Workspace root set to: ${rootPath}`);
+      }
+    }
+  } catch (e) {
+    connection.console.warn(`Failed to set workspace root: ${e}`);
+  }
+
   // Debug: log initialization options
   connection.console.log(
     `Initialization options received: ${JSON.stringify(

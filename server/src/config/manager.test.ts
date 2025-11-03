@@ -4,6 +4,9 @@ import * as sinon from 'sinon';
 import { Connection } from 'vscode-languageserver/node';
 import { ConfigurationManager } from './manager';
 import type { InitConfigOptions } from './types';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 
 
@@ -40,6 +43,101 @@ describe('manager.ts', () => {
       });
     });
 
+    describe('workspace file precedence and failure cases', () => {
+      let tmpDir: string;
+      beforeEach(() => {
+        tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bloglsp-test-'));
+        configManager.setWorkspaceRoot(tmpDir);
+      });
+      afterEach(() => {
+        try {
+          fs.rmSync(tmpDir, { recursive: true, force: true });
+        } catch {}
+      });
+
+      it('TOML style.prompt overrides VS Code stylePrompt', async () => {
+        configManager.setConfigurationCapability(true);
+        // VS Code config returns a stylePrompt, which should be overridden by TOML
+        mockConnection.workspace = {
+          getConfiguration: sinon.stub().resolves({
+            provider: 'openai',
+            model: 'gpt-4',
+            numSuggestions: 1,
+            stylePrompt: 'VS-CODE-STYLE',
+            language: 'ja',
+          }),
+        } as any;
+
+        // Write TOML file
+        const tomlContent = [
+          '[style]',
+          'prompt = """TOML STYLE PROMPT"""',
+        ].join('\n');
+        fs.writeFileSync(path.join(tmpDir, '.blog-lsp.toml'), tomlContent, 'utf8');
+
+        const cfg = await configManager.getConfiguration();
+        assert.ok(cfg);
+        assert.equal(cfg!.stylePrompt, 'TOML STYLE PROMPT');
+      });
+
+      it('YAML used when TOML missing', async () => {
+        configManager.setConfigurationCapability(true);
+        mockConnection.workspace = {
+          getConfiguration: sinon.stub().resolves({
+            provider: 'openai',
+            model: 'gpt-4',
+            numSuggestions: 1,
+            language: 'en',
+          }),
+        } as any;
+
+        const yml = [
+          'style:',
+          '  prompt: |',
+          '    YAML STYLE PROMPT',
+          'completion:',
+          '  maxTextSuggestions: 2',
+          '  maxHeadingSuggestions: 7',
+          '  triggerOnHeading: false',
+        ].join('\n');
+        fs.writeFileSync(path.join(tmpDir, '.blog-lsp.yml'), yml, 'utf8');
+
+        const cfg = await configManager.getConfiguration();
+        assert.ok(cfg);
+        assert.equal(cfg!.stylePrompt, 'YAML STYLE PROMPT\n');
+
+        const comp = await configManager.getCompletionSettings();
+        assert.equal(comp.maxTextSuggestions, 2);
+        assert.equal(comp.maxHeadingSuggestions, 7);
+        assert.equal(comp.triggerOnHeading, false);
+      });
+
+      it('Invalid file is ignored and does not crash', async () => {
+        configManager.setConfigurationCapability(true);
+        mockConnection.workspace = {
+          getConfiguration: sinon.stub().resolves({
+            provider: 'openai',
+            model: 'gpt-4',
+            numSuggestions: 1,
+            stylePrompt: 'FALLBACK STYLE',
+            language: 'ja',
+          }),
+        } as any;
+
+        // Write invalid TOML
+        fs.writeFileSync(
+          path.join(tmpDir, '.blog-lsp.toml'),
+          '[[style]\ninvalid',
+          'utf8'
+        );
+
+        const cfg = await configManager.getConfiguration();
+        assert.ok(cfg);
+        // Falls back to VS Code stylePrompt
+        assert.equal(cfg!.stylePrompt, 'FALLBACK STYLE');
+      });
+    });
+
     describe('getCurrentConfig', () => {
       it('should return null initially', () => {
         const config = configManager.getCurrentConfig();
@@ -52,7 +150,6 @@ describe('manager.ts', () => {
           model: 'gpt-4',
           apiKey: 'test-key',
           numSuggestions: 2,
-          style: 'tech-blog',
           language: 'ja',
           privacy: { scope: 'paragraph' },
           enableStreaming: false,
@@ -80,7 +177,6 @@ describe('manager.ts', () => {
           model: 'gpt-4',
           apiKey: 'test-key',
           numSuggestions: 2,
-          style: 'tech-blog',
           language: 'ja',
           privacy: { scope: 'paragraph' },
           enableStreaming: false,
@@ -112,7 +208,6 @@ describe('manager.ts', () => {
           model: 'gpt-4',
           maxTokens: 128,
           numSuggestions: 3,
-          style: 'formal',
           language: 'en',
           privacy: { scope: 'document' },
           enableStreaming: true,
@@ -129,7 +224,7 @@ describe('manager.ts', () => {
         assert.equal(config!.provider, 'openai');
         assert.equal(config!.model, 'gpt-4');
         assert.equal(config!.numSuggestions, 3);
-        assert.equal(config!.style, 'formal');
+        // style removed
       });
 
       it('should handle environment variable in apiKey', async () => {
@@ -142,7 +237,6 @@ describe('manager.ts', () => {
           model: 'gpt-4',
           apiKey: '${env:TEST_API_KEY}',
           numSuggestions: 1,
-          style: 'tech-blog',
           language: 'ja',
           privacy: { scope: 'paragraph' },
           enableStreaming: false,
@@ -174,7 +268,6 @@ describe('manager.ts', () => {
           apiKey: 'test-key',
           apiBaseUrl: 'https://test.openai.azure.com/openai/deployments/gpt-4',
           numSuggestions: 5,
-          style: 'casual',
           language: 'en',
           privacy: { scope: 'document' },
           enableStreaming: true,
@@ -204,7 +297,6 @@ describe('manager.ts', () => {
         assert.ok(config);
         assert.equal(config!.provider, 'openai');
         assert.equal(config!.numSuggestions, 2);
-        assert.equal(config!.style, 'tech-blog');
       });
 
       it('should initialize provider without apiKey for openai-compatible on localhost', async () => {
@@ -250,7 +342,6 @@ describe('manager.ts', () => {
           provider: 'openai',
           model: 'gpt-4',
           numSuggestions: 1,
-          style: 'tech-blog',
           language: 'ja',
           privacy: { scope: 'paragraph' },
           enableStreaming: false,
@@ -278,7 +369,6 @@ describe('manager.ts', () => {
             model: 'gpt-4',
             apiKey: 'test-key',
             numSuggestions: 1,
-            style: 'tech-blog',
             language: 'ja',
             privacy: { scope: 'paragraph' },
             enableStreaming: false,

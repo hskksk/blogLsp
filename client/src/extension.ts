@@ -338,6 +338,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       }
     })
   );
+
+  // Workspace config files watcher: .blog-lsp.toml / .blog-lsp.yml
+  const watcherToml = vscode.workspace.createFileSystemWatcher('**/.blog-lsp.toml');
+  const watcherYml = vscode.workspace.createFileSystemWatcher('**/.blog-lsp.yml');
+  const restartServer = async () => {
+    if (client && client.isRunning()) {
+      await client.stop();
+      await client.start();
+    }
+  };
+  watcherToml.onDidCreate(restartServer);
+  watcherToml.onDidChange(restartServer);
+  watcherToml.onDidDelete(restartServer);
+  watcherYml.onDidCreate(restartServer);
+  watcherYml.onDidChange(restartServer);
+  watcherYml.onDidDelete(restartServer);
+  context.subscriptions.push(watcherToml, watcherYml);
   
   // 初回起動時のAPIキーチェック
   await checkApiKey(context);

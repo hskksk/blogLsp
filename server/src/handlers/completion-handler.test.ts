@@ -76,7 +76,6 @@ More content.`
       provider: 'openai',
       model: 'gpt-4',
       numSuggestions: 1,
-      style: 'tech-blog',
       language: 'ja',
       privacy: { scope: 'paragraph' },
       enableStreaming: false,

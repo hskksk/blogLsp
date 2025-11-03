@@ -116,15 +116,6 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
       codeActionProvider: {
         resolveProvider: false,
       },
-      /*
-      executeCommandProvider: {
-        commands: [
-          'blogLsp.completeSelection',
-          'blogLsp.completeParagraph',
-          'blogLsp.insertHeading',
-        ],
-      },
-      */
     },
   };
   return result;

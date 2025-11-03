@@ -7,6 +7,7 @@ import type {
   CommandSettings,
   InitConfigOptions,
 } from './types';
+import { WorkspaceConfigLoader } from './loader';
 
 /**
  * Configuration Manager
@@ -17,6 +18,8 @@ export class ConfigurationManager {
   private hasConfigurationCapability: boolean = false;
   private currentConfig: ServerConfig | null = null;
   private llmProvider: LlmProvider | null = null;
+  private workspaceRoot: string | null = null;
+  private workspaceLoader: WorkspaceConfigLoader | null = null;
 
   constructor(connection: Connection) {
     this.connection = connection;
@@ -34,6 +37,16 @@ export class ConfigurationManager {
    */
   hasCapability(): boolean {
     return this.hasConfigurationCapability;
+  }
+
+  /**
+   * Set workspace root to enable loading .blog-lsp.{toml,yml}
+   */
+  setWorkspaceRoot(rootPath: string | undefined): void {
+    if (rootPath && rootPath !== this.workspaceRoot) {
+      this.workspaceRoot = rootPath;
+      this.workspaceLoader = new WorkspaceConfigLoader(rootPath);
+    }
   }
 
   /**
@@ -85,6 +98,7 @@ export class ConfigurationManager {
         temperature: config.temperature, // Optional (not used for gpt-5 series)
         numSuggestions: config.numSuggestions || 1,
         style: config.style || 'tech-blog',
+        stylePrompt: config.stylePrompt, // optional; may be overridden by workspace file
         language: config.language || 'ja',
         privacy: {
           scope: config.privacy?.scope || 'paragraph',
@@ -94,6 +108,14 @@ export class ConfigurationManager {
         reasoningEffort: config.reasoningEffort, // Used for gpt-5 series
         verbosity: config.verbosity, // Used for gpt-5 series
       };
+
+      // Merge workspace file settings with precedence: TOML > YAML > VS Code
+      if (this.workspaceLoader) {
+        const ws = this.workspaceLoader.load();
+        if (ws?.stylePrompt) {
+          blogLspConfig.stylePrompt = ws.stylePrompt;
+        }
+      }
 
       return blogLspConfig;
     } catch (error) {
@@ -173,11 +195,26 @@ export class ConfigurationManager {
 
     try {
       const config = await this.connection.workspace.getConfiguration('blogLsp');
-      return {
+      let settings: CompletionSettings = {
         triggerOnHeading: config.completion?.triggerOnHeading ?? true,
         maxHeadingSuggestions: config.completion?.maxHeadingSuggestions ?? 3,
         maxTextSuggestions: config.completion?.maxTextSuggestions ?? 1,
       };
+      // Workspace file overrides if present
+      if (this.workspaceLoader) {
+        const ws = this.workspaceLoader.load();
+        if (ws?.completion) {
+          settings = {
+            triggerOnHeading:
+              ws.completion.triggerOnHeading ?? settings.triggerOnHeading,
+            maxHeadingSuggestions:
+              ws.completion.maxHeadingSuggestions ?? settings.maxHeadingSuggestions,
+            maxTextSuggestions:
+              ws.completion.maxTextSuggestions ?? settings.maxTextSuggestions,
+          };
+        }
+      }
+      return settings;
     } catch (error) {
       this.connection.console.error(`Failed to get completion settings: ${error}`);
       return {

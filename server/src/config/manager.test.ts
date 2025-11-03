@@ -4,6 +4,9 @@ import * as sinon from 'sinon';
 import { Connection } from 'vscode-languageserver/node';
 import { ConfigurationManager } from './manager';
 import type { InitConfigOptions } from './types';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 
 
@@ -37,6 +40,104 @@ describe('manager.ts', () => {
 
         configManager.setConfigurationCapability(false);
         assert.equal(configManager.hasCapability(), false);
+      });
+    });
+
+    describe('workspace file precedence and failure cases', () => {
+      let tmpDir: string;
+      beforeEach(() => {
+        tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bloglsp-test-'));
+        configManager.setWorkspaceRoot(tmpDir);
+      });
+      afterEach(() => {
+        try {
+          fs.rmSync(tmpDir, { recursive: true, force: true });
+        } catch {}
+      });
+
+      it('TOML style.prompt overrides VS Code stylePrompt', async () => {
+        configManager.setConfigurationCapability(true);
+        // VS Code config returns a stylePrompt, which should be overridden by TOML
+        mockConnection.workspace = {
+          getConfiguration: sinon.stub().resolves({
+            provider: 'openai',
+            model: 'gpt-4',
+            numSuggestions: 1,
+            style: 'casual',
+            stylePrompt: 'VS-CODE-STYLE',
+            language: 'ja',
+          }),
+        } as any;
+
+        // Write TOML file
+        const tomlContent = [
+          '[style]',
+          'prompt = """TOML STYLE PROMPT"""',
+        ].join('\n');
+        fs.writeFileSync(path.join(tmpDir, '.blog-lsp.toml'), tomlContent, 'utf8');
+
+        const cfg = await configManager.getConfiguration();
+        assert.ok(cfg);
+        assert.equal(cfg!.stylePrompt, 'TOML STYLE PROMPT');
+      });
+
+      it('YAML used when TOML missing', async () => {
+        configManager.setConfigurationCapability(true);
+        mockConnection.workspace = {
+          getConfiguration: sinon.stub().resolves({
+            provider: 'openai',
+            model: 'gpt-4',
+            numSuggestions: 1,
+            style: 'formal',
+            language: 'en',
+          }),
+        } as any;
+
+        const yml = [
+          'style:',
+          '  prompt: |',
+          '    YAML STYLE PROMPT',
+          'completion:',
+          '  maxTextSuggestions: 2',
+          '  maxHeadingSuggestions: 7',
+          '  triggerOnHeading: false',
+        ].join('\n');
+        fs.writeFileSync(path.join(tmpDir, '.blog-lsp.yml'), yml, 'utf8');
+
+        const cfg = await configManager.getConfiguration();
+        assert.ok(cfg);
+        assert.equal(cfg!.stylePrompt, 'YAML STYLE PROMPT\n');
+
+        const comp = await configManager.getCompletionSettings();
+        assert.equal(comp.maxTextSuggestions, 2);
+        assert.equal(comp.maxHeadingSuggestions, 7);
+        assert.equal(comp.triggerOnHeading, false);
+      });
+
+      it('Invalid file is ignored and does not crash', async () => {
+        configManager.setConfigurationCapability(true);
+        mockConnection.workspace = {
+          getConfiguration: sinon.stub().resolves({
+            provider: 'openai',
+            model: 'gpt-4',
+            numSuggestions: 1,
+            style: 'tech-blog',
+            stylePrompt: 'FALLBACK STYLE',
+            language: 'ja',
+          }),
+        } as any;
+
+        // Write invalid TOML
+        fs.writeFileSync(
+          path.join(tmpDir, '.blog-lsp.toml'),
+          '[[style]\ninvalid',
+          'utf8'
+        );
+
+        const cfg = await configManager.getConfiguration();
+        assert.ok(cfg);
+        // Falls back to VS Code stylePrompt
+        assert.equal(cfg!.stylePrompt, 'FALLBACK STYLE');
       });
     });
 

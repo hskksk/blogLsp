@@ -95,7 +95,6 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
       codeActionProvider: {
         resolveProvider: false,
       },
-      /*
       executeCommandProvider: {
         commands: [
           'blogLsp.completeSelection',
@@ -103,7 +102,6 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
           'blogLsp.insertHeading',
         ],
       },
-      */
     },
   };
   return result;

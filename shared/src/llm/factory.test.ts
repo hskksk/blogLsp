@@ -7,6 +7,24 @@ import type { BlogLspConfig } from '../index';
 
 describe('factory.ts', () => {
   describe('createLlmProvider', () => {
+    it('should create Anthropic provider for anthropic', () => {
+      const config: BlogLspConfig = {
+        provider: 'anthropic',
+        model: 'claude-3-5-haiku-20241022',
+        apiKey: 'test-key',
+        numSuggestions: 1,
+        language: 'ja',
+        privacy: { scope: 'paragraph' },
+        enableStreaming: false,
+        timeoutMs: 5000,
+      };
+
+      const provider = createLlmProvider(config);
+
+      assert.ok(provider);
+      assert.equal(provider.name, 'anthropic');
+      assert.strictEqual(provider.supportsStreaming, false);
+    });
     it('should create OpenAI provider for openai', () => {
       const config: BlogLspConfig = {
         provider: 'openai',
@@ -231,6 +249,7 @@ describe('factory.ts', () => {
       assert.ok(providers.includes('local-openai'));
       assert.ok(providers.includes('local'));
       assert.ok(providers.includes('azure-openai'));
+      assert.ok(providers.includes('anthropic'));
     });
 
     it('should return consistent provider list', () => {

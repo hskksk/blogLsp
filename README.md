@@ -32,6 +32,30 @@ Notes:
 - API key is optional when using `openai-compatible`/`local*` providers or when `LLM_API_BASE_URL` points to localhost.
 - Streaming is currently disabled in the test script.
 
+### Anthropic Provider
+
+Anthropic is supported via LangChain's `@langchain/anthropic`.
+
+VS Code settings example:
+
+```json
+{
+  "blogLsp.provider": "anthropic",
+  "blogLsp.model": "claude-3-5-haiku-20241022",
+  "blogLsp.apiKey": "${env:ANTHROPIC_API_KEY}",
+  "blogLsp.apiBaseUrl": "https://api.anthropic.com"
+}
+```
+
+Environment variables for test script:
+
+```bash
+export LLM_PROVIDER=anthropic
+export LLM_MODEL=claude-3-5-haiku-20241022
+export ANTHROPIC_API_KEY=sk-ant-...
+npm -w shared run test:llm
+```
+
 ### VS Code settings.json example
 
 Add the following to your user or workspace settings to use a local OpenAI-compatible endpoint:

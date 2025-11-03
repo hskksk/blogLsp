@@ -25,11 +25,105 @@
     "configuration": {
       "title": "Blog LSP",
       "properties": {
+        "blogLsp.provider": {
+          "type": "string",
+          "enum": ["openai", "openai-compatible", "local-openai", "local", "azure-openai", "anthropic"],
+          "default": "openai",
+          "markdownDescription": "LLM provider to use. Supports OpenAI, Azure OpenAI, OpenAI-compatible endpoints, and Anthropic."
+        },
+        "blogLsp.model": {
+          "type": "string",
+          "default": "gpt-4.1-nano",
+          "markdownDescription": "Model name for the selected provider. For Anthropic, e.g. 'claude-3-5-haiku-20241022'."
+        },
+        "blogLsp.apiBaseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Optional custom base URL for the provider. For Anthropic, defaults to https://api.anthropic.com when empty."
+        },
+        "blogLsp.apiKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "API key for the provider. You can reference environment variables like ${env:ANTHROPIC_API_KEY}.",
+          "scope": "machine-overridable"
+        },
+        "blogLsp.maxTokens": {
+          "type": "number",
+          "default": 256,
+          "markdownDescription": "Maximum tokens for responses (used for non gpt-5 models and Anthropic)."
+        },
+        "blogLsp.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "markdownDescription": "Sampling temperature (used for non gpt-5 models and Anthropic)."
+        },
+        "blogLsp.numSuggestions": {
+          "type": "number",
+          "default": 1,
+          "markdownDescription": "Number of completion suggestions to generate."
+        },
+        "blogLsp.language": {
+          "type": "string",
+          "enum": ["ja", "en"],
+          "default": "ja",
+          "markdownDescription": "Primary language for prompts and style guidance."
+        },
+        "blogLsp.privacy.scope": {
+          "type": "string",
+          "enum": ["selection", "paragraph", "document"],
+          "default": "paragraph",
+          "markdownDescription": "Scope of text to send for completions."
+        },
+        "blogLsp.enableStreaming": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable streaming responses when supported by the provider."
+        },
+        "blogLsp.timeoutMs": {
+          "type": "number",
+          "default": 50000,
+          "markdownDescription": "Timeout in milliseconds for LLM requests."
+        },
+        "blogLsp.reasoningEffort": {
+          "type": "string",
+          "enum": ["minimal", "low", "middle", "high"],
+          "markdownDescription": "For gpt-5 series: set reasoning effort level."
+        },
+        "blogLsp.verbosity": {
+          "type": "string",
+          "enum": ["low", "middle", "high"],
+          "markdownDescription": "For gpt-5 series: set verbosity level."
+        },
         "blogLsp.stylePrompt": {
           "type": "string",
           "markdownDescription": "Optional multi-line style guide prompt to steer writing style.",
           "default": "",
           "scope": "window"
+        },
+        "blogLsp.completion.maxTextSuggestions": {
+          "type": "number",
+          "default": 1,
+          "markdownDescription": "Maximum number of text completion suggestions."
+        },
+        "blogLsp.completion.maxHeadingSuggestions": {
+          "type": "number",
+          "default": 3,
+          "markdownDescription": "Maximum number of heading suggestions."
+        },
+        "blogLsp.completion.triggerOnHeading": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Trigger completion suggestions when typing headings."
+        },
+        "blogLsp.commands.enableHeadingGeneration": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable command: generate headings."
+        },
+        "blogLsp.commands.enableParagraphCompletion": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable command: paragraph completion."
         }
       }
     }

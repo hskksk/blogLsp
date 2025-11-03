@@ -108,6 +108,22 @@ export class ConfigurationManager {
         verbosity: config.verbosity, // Used for gpt-5 series
       };
 
+      // Provider-specific defaults and env fallbacks
+      if (blogLspConfig.provider?.toLowerCase() === 'anthropic') {
+        // Default model if not set
+        if (!blogLspConfig.model) {
+          blogLspConfig.model = 'claude-3-5-haiku-20241022';
+        }
+        // Fallback API key from environment
+        if (!blogLspConfig.apiKey && process.env.ANTHROPIC_API_KEY) {
+          blogLspConfig.apiKey = process.env.ANTHROPIC_API_KEY;
+        }
+        // Default base URL when not specified
+        if (!blogLspConfig.apiBaseUrl) {
+          blogLspConfig.apiBaseUrl = 'https://api.anthropic.com';
+        }
+      }
+
       // Merge workspace file settings with precedence: TOML > YAML > VS Code
       if (this.workspaceLoader) {
         const ws = this.workspaceLoader.load();
@@ -157,6 +173,19 @@ export class ConfigurationManager {
         reasoningEffort: initConfig.reasoningEffort, // Used for gpt-5 series
         verbosity: initConfig.verbosity, // Used for gpt-5 series
       };
+
+      // Provider-specific defaults and env fallbacks (init path)
+      if (blogLspConfig.provider?.toLowerCase() === 'anthropic') {
+        if (!blogLspConfig.model) {
+          blogLspConfig.model = 'claude-3-5-haiku-20241022';
+        }
+        if (!blogLspConfig.apiKey && process.env.ANTHROPIC_API_KEY) {
+          blogLspConfig.apiKey = process.env.ANTHROPIC_API_KEY;
+        }
+        if (!blogLspConfig.apiBaseUrl) {
+          blogLspConfig.apiBaseUrl = 'https://api.anthropic.com';
+        }
+      }
 
       this.currentConfig = blogLspConfig;
       this.llmProvider = createLlmProvider(blogLspConfig);

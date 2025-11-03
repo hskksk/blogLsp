@@ -67,6 +67,7 @@ export {
   AzureOpenAILangChainProvider,
   isGpt5Series,
 } from './llm/providers';
+export { AnthropicLangChainProvider } from './llm/providers/anthropic';
 
 // Markdown extraction exports
 export { extractMarkdownContext, extractTextByScope } from './markdown/extractor';

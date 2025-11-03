@@ -5,6 +5,7 @@ import {
   AzureOpenAILangChainProvider,
   type LangChainProviderConfig,
 } from './providers';
+import { AnthropicLangChainProvider } from './providers/anthropic';
 
 /**
  * LLMプロバイダファクトリー
@@ -23,6 +24,13 @@ export function createLlmProvider(config: BlogLspConfig): LlmProvider {
   };
 
   switch (config.provider.toLowerCase()) {
+    case 'anthropic': {
+      const withDefaultModel: LangChainProviderConfig = {
+        ...providerConfig,
+        model: providerConfig.model || 'claude-3-5-haiku-20241022',
+      };
+      return new AnthropicLangChainProvider(withDefaultModel);
+    }
     case 'openai':
       return new OpenAILangChainProvider(providerConfig);
 
@@ -46,6 +54,6 @@ export function createLlmProvider(config: BlogLspConfig): LlmProvider {
  * 利用可能なプロバイダのリストを取得
  */
 export function getAvailableProviders(): string[] {
-  return ['openai', 'openai-compatible', 'local-openai', 'local', 'azure-openai'];
+  return ['openai', 'openai-compatible', 'local-openai', 'local', 'azure-openai', 'anthropic'];
 }
 

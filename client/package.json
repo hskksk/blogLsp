@@ -20,18 +20,5 @@
   "devDependencies": {
 		"@types/vscode": "^1.99.0",
 		"@vscode/test-electron": "^2.3.9"
-  },
-  "contributes": {
-    "configuration": {
-      "title": "Blog LSP",
-      "properties": {
-        "blogLsp.stylePrompt": {
-          "type": "string",
-          "markdownDescription": "Optional multi-line style guide prompt to steer writing style.",
-          "default": "",
-          "scope": "window"
-        }
-      }
-    }
   }
 }

@@ -144,6 +144,12 @@
           "default": "ja",
           "description": "Language for generated completions."
         },
+        "blogLsp.stylePrompt": {
+          "type": "string",
+          "markdownDescription": "Optional multi-line style guide prompt to steer writing style.",
+          "default": "",
+          "scope": "window"
+        },
         "blogLsp.privacy.scope": {
           "scope": "window",
           "type": "string",

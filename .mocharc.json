@@ -1,0 +1,10 @@
+{
+  "extension": ["ts"],
+  "spec": ["shared/src/**/*.test.ts", "server/src/**/*.test.ts"],
+  "require": ["ts-node/register"],
+  "timeout": 10000,
+  "exit": true,
+  "recursive": true,
+  "ignore": ["**/node_modules/**"]
+}
+

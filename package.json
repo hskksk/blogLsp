@@ -74,10 +74,11 @@
             "openai-compatible",
             "local-openai",
             "local",
-            "azure-openai"
+            "azure-openai",
+            "anthropic"
           ],
           "default": "openai",
-          "description": "LLM provider. Use openai-compatible/local(-openai) with custom blogLsp.apiBaseUrl."
+          "description": "LLM provider. Use openai-compatible/local(-openai) with custom blogLsp.apiBaseUrl. For Anthropic, set blogLsp.apiBaseUrl to https://api.anthropic.com and blogLsp.apiKey to ${env:ANTHROPIC_API_KEY}."
         },
         "blogLsp.model": {
           "scope": "window",

@@ -1,4 +1,5 @@
 import { ChatOpenAI } from '@langchain/openai';
+import { ChatAnthropic } from '@langchain/anthropic';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { HumanMessage } from '@langchain/core/messages';
 import type { LlmProvider } from '../index';
@@ -207,5 +208,40 @@ export class AzureOpenAILangChainProvider extends LangChainLlmProvider {
     }
 
     return new ChatOpenAI(modelConfig) as BaseChatModel;
+  }
+}
+
+/**
+ * Anthropicプロバイダ実装
+ */
+export class AnthropicLangChainProvider extends LangChainLlmProvider {
+  name = 'anthropic';
+  supportsStreaming = false;
+
+  protected createModel(config: LangChainProviderConfig): BaseChatModel {
+    const modelConfig: any = {
+      model: config.model,
+    };
+
+    if (config.apiKey) {
+      modelConfig.apiKey = config.apiKey;
+    }
+
+    if (config.apiBaseUrl) {
+      modelConfig.baseURL = config.apiBaseUrl;
+    }
+
+    // temperature/maxTokens are supported by many Claude models
+    if (config.temperature !== undefined) {
+      modelConfig.temperature = config.temperature;
+    }
+    if (config.maxTokens) {
+      modelConfig.maxTokens = config.maxTokens;
+    }
+    if (config.timeout) {
+      modelConfig.timeout = config.timeout;
+    }
+
+    return new ChatAnthropic(modelConfig) as unknown as BaseChatModel;
   }
 }

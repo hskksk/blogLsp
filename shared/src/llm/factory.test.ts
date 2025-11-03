@@ -65,6 +65,26 @@ describe('factory.ts', () => {
       assert.equal(provider.name, 'azure-openai');
     });
 
+    it('should create Anthropic provider for anthropic', () => {
+      const config: BlogLspConfig = {
+        provider: 'anthropic',
+        model: 'claude-3-5-haiku-20241022',
+        apiKey: 'test-key',
+        numSuggestions: 1,
+        language: 'ja',
+        privacy: { scope: 'paragraph' },
+        enableStreaming: false,
+        timeoutMs: 5000,
+        apiBaseUrl: 'https://api.anthropic.com',
+      } as any;
+
+      const provider = createLlmProvider(config);
+
+      assert.ok(provider);
+      assert.equal(provider.name, 'anthropic');
+      assert.ok(provider.supportsStreaming === false);
+    });
+
     it('should default to OpenAI for unknown providers', () => {
       const config: BlogLspConfig = {
         provider: 'unknown-provider',
@@ -231,6 +251,7 @@ describe('factory.ts', () => {
       assert.ok(providers.includes('local-openai'));
       assert.ok(providers.includes('local'));
       assert.ok(providers.includes('azure-openai'));
+      assert.ok(providers.includes('anthropic'));
     });
 
     it('should return consistent provider list', () => {

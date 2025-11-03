@@ -87,12 +87,24 @@ export class ConfigurationManager {
         apiKey = process.env[envVarName] || apiKey;
       }
 
+      // Provider-specific fallbacks
+      const providerValue = (config.provider || '').toString().toLowerCase();
+      if ((!apiKey || apiKey === '${env:OPENAI_API_KEY}') && providerValue === 'anthropic') {
+        // Prefer ANTHROPIC_API_KEY automatically when provider is anthropic
+        apiKey = process.env['ANTHROPIC_API_KEY'] || apiKey;
+      }
+
       // API key from secret storage should already be set via initialization options
       // Here we only get values from config file (use existing currentConfig if empty)
       const blogLspConfig: ServerConfig = {
         provider: config.provider || 'openai',
-        model: config.model || 'gpt-4.1-nano',
-        apiBaseUrl: config.apiBaseUrl,
+        model:
+          (providerValue === 'anthropic' && config.model) ? config.model :
+          (providerValue === 'anthropic' ? 'claude-3-5-haiku-20241022' : (config.model || 'gpt-4.1-nano')),
+        apiBaseUrl:
+          (providerValue === 'anthropic' && !config.apiBaseUrl)
+            ? 'https://api.anthropic.com'
+            : config.apiBaseUrl,
         apiKey: this.currentConfig?.apiKey || apiKey, // Preserve existing API key
         maxTokens: config.maxTokens, // Optional (not used for gpt-5 series)
         temperature: config.temperature, // Optional (not used for gpt-5 series)

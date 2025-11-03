@@ -106,6 +106,66 @@ describe('factory.ts', () => {
       assert.equal(provider.name, 'openai');
     });
 
+    it('should create OpenAI provider for openai-compatible', () => {
+      const config: BlogLspConfig = {
+        provider: 'openai-compatible',
+        model: 'gpt-4',
+        apiKey: 'dummy',
+        numSuggestions: 1,
+        style: 'tech-blog',
+        language: 'ja',
+        privacy: { scope: 'paragraph' },
+        enableStreaming: false,
+        timeoutMs: 5000,
+        apiBaseUrl: 'http://localhost:11434/v1',
+      } as any;
+
+      const provider = createLlmProvider(config);
+
+      assert.ok(provider);
+      assert.equal(provider.name, 'openai');
+    });
+
+    it('should create OpenAI provider for local-openai alias', () => {
+      const config: BlogLspConfig = {
+        provider: 'local-openai',
+        model: 'llama3.1:8b',
+        apiKey: 'dummy',
+        numSuggestions: 1,
+        style: 'tech-blog',
+        language: 'ja',
+        privacy: { scope: 'paragraph' },
+        enableStreaming: false,
+        timeoutMs: 5000,
+        apiBaseUrl: 'http://localhost:11434/v1',
+      } as any;
+
+      const provider = createLlmProvider(config);
+
+      assert.ok(provider);
+      assert.equal(provider.name, 'openai');
+    });
+
+    it('should create OpenAI provider for local alias', () => {
+      const config: BlogLspConfig = {
+        provider: 'local',
+        model: 'llama3.1:8b',
+        apiKey: 'dummy',
+        numSuggestions: 1,
+        style: 'tech-blog',
+        language: 'ja',
+        privacy: { scope: 'paragraph' },
+        enableStreaming: false,
+        timeoutMs: 5000,
+        apiBaseUrl: 'http://localhost:11434/v1',
+      } as any;
+
+      const provider = createLlmProvider(config);
+
+      assert.ok(provider);
+      assert.equal(provider.name, 'openai');
+    });
+
     it('should pass configuration to provider', () => {
       const config: BlogLspConfig = {
         provider: 'openai',
@@ -158,6 +218,9 @@ describe('factory.ts', () => {
       assert.ok(Array.isArray(providers));
       assert.ok(providers.length > 0);
       assert.ok(providers.includes('openai'));
+      assert.ok(providers.includes('openai-compatible'));
+      assert.ok(providers.includes('local-openai'));
+      assert.ok(providers.includes('local'));
       assert.ok(providers.includes('azure-openai'));
     });
 

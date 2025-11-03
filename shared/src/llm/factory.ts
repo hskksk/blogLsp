@@ -26,6 +26,12 @@ export function createLlmProvider(config: BlogLspConfig): LlmProvider {
     case 'openai':
       return new OpenAILangChainProvider(providerConfig);
 
+    // Explicit local/OpenAI-compatible aliases that reuse OpenAI provider with apiBaseUrl
+    case 'openai-compatible':
+    case 'local-openai':
+    case 'local':
+      return new OpenAILangChainProvider(providerConfig);
+
     case 'azure-openai':
     case 'azure':
       return new AzureOpenAILangChainProvider(providerConfig);
@@ -40,6 +46,6 @@ export function createLlmProvider(config: BlogLspConfig): LlmProvider {
  * 利用可能なプロバイダのリストを取得
  */
 export function getAvailableProviders(): string[] {
-  return ['openai', 'azure-openai'];
+  return ['openai', 'openai-compatible', 'local-openai', 'local', 'azure-openai'];
 }
 

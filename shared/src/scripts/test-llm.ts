@@ -18,7 +18,12 @@ function getConfig(): BlogLspConfig {
   const apiKey = process.env.OPENAI_API_KEY || process.env.LLM_API_KEY;
   const apiBaseUrl = process.env.LLM_API_BASE_URL;
   
-  if (!apiKey) {
+  // Allow missing API key for local OpenAI-compatible providers or localhost endpoints
+  const providerId = provider.toLowerCase();
+  const isLocalProvider = ['openai-compatible', 'local-openai', 'local'].includes(providerId);
+  const isLocalhostBase = !!apiBaseUrl && /^(http:\/\/localhost|http:\/\/127\.0\.0\.1|http:\/\/0\.0\.0\.0)/i.test(apiBaseUrl);
+
+  if (!apiKey && !(isLocalProvider || isLocalhostBase)) {
     console.error('Error: API key not found. Set OPENAI_API_KEY or LLM_API_KEY environment variable.');
     process.exit(1);
   }

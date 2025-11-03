@@ -97,7 +97,6 @@ export class ConfigurationManager {
         maxTokens: config.maxTokens, // Optional (not used for gpt-5 series)
         temperature: config.temperature, // Optional (not used for gpt-5 series)
         numSuggestions: config.numSuggestions || 1,
-        style: config.style || 'tech-blog',
         stylePrompt: config.stylePrompt, // optional; may be overridden by workspace file
         language: config.language || 'ja',
         privacy: {
@@ -149,7 +148,6 @@ export class ConfigurationManager {
         maxTokens: initConfig.maxTokens, // Optional (not used for gpt-5 series)
         temperature: initConfig.temperature, // Optional (not used for gpt-5 series)
         numSuggestions: initConfig.numSuggestions || 2,
-        style: initConfig.style || 'tech-blog',
         language: initConfig.language || 'ja',
         privacy: {
           scope: initConfig.privacy?.scope || 'paragraph',

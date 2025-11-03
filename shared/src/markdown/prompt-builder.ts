@@ -33,7 +33,7 @@ export interface PromptBuildingOptions {
  */
 export function buildCompletionPrompt(options: PromptBuildingOptions): string {
   const { currentText, linesBefore, linesAfter, config } = options;
-  let systemPrompt = buildSystemPrompt(config.style, config.language, config.stylePrompt);
+  let systemPrompt = buildSystemPrompt(config.language, config.stylePrompt);
   if (config.stylePrompt && !systemPrompt.includes(config.stylePrompt)) {
     systemPrompt = `${systemPrompt}\n${config.stylePrompt}`;
   }
@@ -68,7 +68,7 @@ export function buildHeadingSuggestionPrompt(options: {
   config: BlogLspConfig;
 }): string {
   const { linesBefore, currentLine, linesAfter, config } = options;
-  let systemPrompt = buildSystemPrompt(config.style, config.language, config.stylePrompt);
+  let systemPrompt = buildSystemPrompt(config.language, config.stylePrompt);
   if (config.stylePrompt && !systemPrompt.includes(config.stylePrompt)) {
     systemPrompt = `${systemPrompt}\n${config.stylePrompt}`;
   }
@@ -100,7 +100,7 @@ export function buildHeadingSuggestionPrompt(options: {
  */
 export function buildParagraphCompletionPrompt(options: PromptBuildingOptions): string {
   const { currentText, linesBefore, linesAfter, config } = options;
-  let systemPrompt = buildSystemPrompt(config.style, config.language, config.stylePrompt);
+  let systemPrompt = buildSystemPrompt(config.language, config.stylePrompt);
   if (config.stylePrompt && !systemPrompt.includes(config.stylePrompt)) {
     systemPrompt = `${systemPrompt}\n${config.stylePrompt}`;
   }

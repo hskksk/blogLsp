@@ -36,7 +36,6 @@ function getConfig(): BlogLspConfig {
     maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '256', 10),
     temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.7'),
     numSuggestions: parseInt(process.env.LLM_NUM_SUGGESTIONS || '2', 10),
-    style: (process.env.LLM_STYLE as 'tech-blog' | 'casual' | 'formal') || 'tech-blog',
     language: (process.env.LLM_LANGUAGE as 'ja' | 'en') || 'ja',
     privacy: {
       scope: 'paragraph',
@@ -56,7 +55,6 @@ async function main() {
   console.log(`  Max Tokens: ${config.maxTokens}`);
   console.log(`  Temperature: ${config.temperature}`);
   console.log(`  Num Suggestions: ${config.numSuggestions}`);
-  console.log(`  Style: ${config.style}`);
   console.log(`  Language: ${config.language}\n`);
 
   try {
@@ -66,7 +64,7 @@ async function main() {
     console.log(`✓ Streaming supported: ${provider.supportsStreaming}\n`);
 
     // システムプロンプトを構築
-    const systemPrompt = buildSystemPrompt(config.style, config.language);
+    const systemPrompt = buildSystemPrompt(config.language, config.stylePrompt);
     
     // テスト用のプロンプト
     const testPrompt = `${systemPrompt}\n\nContinue the following paragraph naturally:\n\nTypeScript is a powerful language that extends JavaScript with type safety. When developing large-scale applications,`;

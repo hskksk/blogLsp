@@ -8,7 +8,6 @@ function makeConfig(overrides: Partial<BlogLspConfig> = {}): BlogLspConfig {
     provider: 'openai',
     model: 'gpt-4.1-nano',
     numSuggestions: 1,
-    style: 'tech-blog',
     language: 'en',
     privacy: { scope: 'paragraph' },
     enableStreaming: false,

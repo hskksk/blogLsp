@@ -92,7 +92,7 @@ export class WorkspaceConfigLoader {
     if (typeof parsed?.reasoningEffort === 'string') result.reasoningEffort = parsed.reasoningEffort;
     if (typeof parsed?.verbosity === 'string') result.verbosity = parsed.verbosity;
     if (parsed?.privacy && typeof parsed.privacy === 'object') {
-      const scope = parsed.privacy.scope;
+      const scope = parsed.privacy.scope as 'selection' | 'paragraph' | 'document' | undefined;
       result.privacy = result.privacy || {};
       if (typeof scope === 'string') result.privacy.scope = scope;
     }

@@ -10,7 +10,6 @@ export interface BlogLspConfig {
   maxTokens?: number; // gpt-5系以前で使用（gpt-5系では使用しない）
   temperature?: number; // gpt-5系以前で使用（gpt-5系では使用しない）
   numSuggestions: number;
-  style: 'tech-blog' | 'casual' | 'formal';
   /**
    * 任意の複数行スタイルプロンプト。
    * 指定がある場合は既存のスタイル文を上書きする。
@@ -42,21 +41,13 @@ export interface LlmProvider {
 }
 
 export function buildSystemPrompt(
-  style: BlogLspConfig['style'],
   language: BlogLspConfig['language'],
   stylePrompt?: BlogLspConfig['stylePrompt']
 ): string {
-  const styleText = style === 'tech-blog'
-    ? 'Concise, clear, developer-friendly tone.'
-    : style === 'formal'
-      ? 'Formal, precise tone.'
-      : 'Casual, friendly tone.';
   const languageText = language === 'ja' ? 'Language: Japanese.' : 'Language: English.';
 
   return renderTemplate('system', {
-    styleText,
     languageText,
-    // stylePrompt が与えられていればテンプレート側で利用される
     stylePrompt,
     hasStylePrompt: Boolean(stylePrompt && stylePrompt.trim().length > 0),
   }).trim();

@@ -63,7 +63,6 @@ describe('manager.ts', () => {
             provider: 'openai',
             model: 'gpt-4',
             numSuggestions: 1,
-            style: 'casual',
             stylePrompt: 'VS-CODE-STYLE',
             language: 'ja',
           }),
@@ -88,7 +87,6 @@ describe('manager.ts', () => {
             provider: 'openai',
             model: 'gpt-4',
             numSuggestions: 1,
-            style: 'formal',
             language: 'en',
           }),
         } as any;
@@ -121,7 +119,6 @@ describe('manager.ts', () => {
             provider: 'openai',
             model: 'gpt-4',
             numSuggestions: 1,
-            style: 'tech-blog',
             stylePrompt: 'FALLBACK STYLE',
             language: 'ja',
           }),
@@ -153,7 +150,6 @@ describe('manager.ts', () => {
           model: 'gpt-4',
           apiKey: 'test-key',
           numSuggestions: 2,
-          style: 'tech-blog',
           language: 'ja',
           privacy: { scope: 'paragraph' },
           enableStreaming: false,
@@ -181,7 +177,6 @@ describe('manager.ts', () => {
           model: 'gpt-4',
           apiKey: 'test-key',
           numSuggestions: 2,
-          style: 'tech-blog',
           language: 'ja',
           privacy: { scope: 'paragraph' },
           enableStreaming: false,
@@ -213,7 +208,6 @@ describe('manager.ts', () => {
           model: 'gpt-4',
           maxTokens: 128,
           numSuggestions: 3,
-          style: 'formal',
           language: 'en',
           privacy: { scope: 'document' },
           enableStreaming: true,
@@ -230,7 +224,7 @@ describe('manager.ts', () => {
         assert.equal(config!.provider, 'openai');
         assert.equal(config!.model, 'gpt-4');
         assert.equal(config!.numSuggestions, 3);
-        assert.equal(config!.style, 'formal');
+        // style removed
       });
 
       it('should handle environment variable in apiKey', async () => {
@@ -243,7 +237,6 @@ describe('manager.ts', () => {
           model: 'gpt-4',
           apiKey: '${env:TEST_API_KEY}',
           numSuggestions: 1,
-          style: 'tech-blog',
           language: 'ja',
           privacy: { scope: 'paragraph' },
           enableStreaming: false,
@@ -275,7 +268,6 @@ describe('manager.ts', () => {
           apiKey: 'test-key',
           apiBaseUrl: 'https://test.openai.azure.com/openai/deployments/gpt-4',
           numSuggestions: 5,
-          style: 'casual',
           language: 'en',
           privacy: { scope: 'document' },
           enableStreaming: true,
@@ -305,7 +297,6 @@ describe('manager.ts', () => {
         assert.ok(config);
         assert.equal(config!.provider, 'openai');
         assert.equal(config!.numSuggestions, 2);
-        assert.equal(config!.style, 'tech-blog');
       });
 
       it('should initialize provider without apiKey for openai-compatible on localhost', async () => {
@@ -351,7 +342,6 @@ describe('manager.ts', () => {
           provider: 'openai',
           model: 'gpt-4',
           numSuggestions: 1,
-          style: 'tech-blog',
           language: 'ja',
           privacy: { scope: 'paragraph' },
           enableStreaming: false,
@@ -379,7 +369,6 @@ describe('manager.ts', () => {
             model: 'gpt-4',
             apiKey: 'test-key',
             numSuggestions: 1,
-            style: 'tech-blog',
             language: 'ja',
             privacy: { scope: 'paragraph' },
             enableStreaming: false,

@@ -35,7 +35,6 @@ export interface InitConfigOptions {
   maxTokens?: number;
   temperature?: number;
   numSuggestions?: number;
-  style?: 'tech-blog' | 'casual' | 'formal';
   language?: 'ja' | 'en';
   privacy?: {
     scope?: 'selection' | 'paragraph' | 'document';

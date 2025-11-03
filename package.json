@@ -1,235 +1,241 @@
 {
   "name": "blogLsp",
   "private": true,
-	"author": "hskksk",
-	"license": "MIT",
+  "author": "hskksk",
+  "license": "MIT",
   "version": "0.1.0",
-	"publisher": "hskksk",
-	"categories": [],
-	"main": "./client/out/extension",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/hskksk/blogLsp"
-	},
-  "engines": {
-		"vscode": "^1.99.0"
+  "publisher": "hskksk",
+  "categories": [],
+  "main": "./client/out/extension",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hskksk/blogLsp"
   },
-	"activationEvents": [
-		"onLanguage:markdown"
-	],
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -b",
-	    "clean": "tsc -b -clean",
-        "watch": "tsc -b -w",
-		"lint": "eslint",
-		"postinstall": "cd shared && npm install && cd ../client && npm install && cd ../server && npm install && cd ..",
-		"test": "sh ./scripts/e2e.sh",
-		"test:llm": "tsx shared/src/scripts/test-llm.ts",
-		"test:llm:build": "npm run compile && node shared/out/scripts/test-llm.js"
-	},
-	"keywords": [
-		"multi-root ready"
-	],
-	"contributes": {
-		"commands": [
-			{
-				"command": "blogLsp.setApiKey",
-				"title": "Set API Key",
-				"category": "Blog LSP"
-			},
-			{
-				"command": "blogLsp.deleteApiKey",
-				"title": "Delete API Key",
-				"category": "Blog LSP"
-			},
-			{
-				"command": "blogLsp.completeSelection",
-				"title": "Complete Selection",
-				"category": "Blog LSP"
-			},
-			{
-				"command": "blogLsp.completeParagraph",
-				"title": "Complete Paragraph",
-				"category": "Blog LSP"
-			},
-			{
-				"command": "blogLsp.insertHeading",
-				"title": "Insert Heading",
-				"category": "Blog LSP"
-			}
-		],
-		"configuration": {
-			"type": "object",
-			"title": "Blog Language Server configuration",
-			"properties": {
-				"blogLsp.provider": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"openai",
-						"azure-openai"
-					],
-					"default": "openai",
-					"description": "LLM provider to use for text completion."
-				},
-				"blogLsp.model": {
-					"scope": "window",
-					"type": "string",
-					"default": "gpt-5-nano",
-					"description": "Model name to use for text completion."
-				},
-				"blogLsp.apiBaseUrl": {
-					"scope": "window",
-					"type": "string",
-					"default": "https://api.openai.com/v1",
-					"description": "API base URL for the LLM provider. Leave empty to use the default URL for the provider."
-				},
-				"blogLsp.apiKey": {
-					"scope": "window",
-					"type": "string",
-					"default": "${env:OPENAI_API_KEY}",
-					"description": "API key for the LLM provider. You can use ${env:VAR_NAME} to reference environment variables."
-				},
-				"blogLsp.maxTokens": {
-					"scope": "window",
-					"type": "number",
-					"default": 128,
-					"description": "Maximum number of tokens to generate for each completion."
-				},
-				"blogLsp.reasoningEffort": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"minimal",
-						"low",
-						"middle",
-						"high"
-					],
-					"default": "minimal",
-					"description": "Reasoning level for the LLM."
-				},
-				"blogLsp.verbosity": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"low",
-						"middle",
-						"high"
-					],
-					"default": "low",
-					"description": "Verbosity level for the LLM."
-				},
-				"blogLsp.numSuggestions": {
-					"scope": "window",
-					"type": "number",
-					"default": 1,
-					"minimum": 1,
-					"maximum": 5,
-					"description": "Number of completion suggestions to generate."
-				},
-				"blogLsp.style": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"tech-blog",
-						"casual",
-						"formal"
-					],
-					"default": "tech-blog",
-					"description": "Writing style for generated completions."
-				},
-				"blogLsp.language": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"ja",
-						"en"
-					],
-					"default": "ja",
-					"description": "Language for generated completions."
-				},
-				"blogLsp.privacy.scope": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"selection",
-						"paragraph",
-						"document"
-					],
-					"default": "paragraph",
-					"description": "Privacy scope for sending text to LLM. 'selection' sends only selected text, 'paragraph' sends the current paragraph, 'document' sends the entire document."
-				},
-				"blogLsp.enableStreaming": {
-					"scope": "window",
-					"type": "boolean",
-					"default": true,
-					"description": "Enable streaming for completion suggestions (if supported by the provider)."
-				},
-				"blogLsp.timeoutMs": {
-					"scope": "window",
-					"type": "number",
-					"default": 50000,
-					"minimum": 1000,
-					"description": "Timeout in milliseconds for LLM API requests."
-				},
-				"blogLsp.trace.server": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the language server."
-				},
-				"blogLsp.completion.triggerOnHeading": {
-					"scope": "window",
-					"type": "boolean",
-					"default": true,
-					"description": "Enable heading suggestions when typing '#' character."
-				},
-				"blogLsp.completion.maxHeadingSuggestions": {
-					"scope": "window",
-					"type": "number",
-					"default": 3,
-					"minimum": 1,
-					"maximum": 10,
-					"description": "Maximum number of heading suggestions to generate."
-				},
-				"blogLsp.completion.maxTextSuggestions": {
-					"scope": "window",
-					"type": "number",
-					"default": 1,
-					"minimum": 1,
-					"maximum": 10,
-					"description": "Maximum number of text completion suggestions to generate."
-				},
-				"blogLsp.commands.enableHeadingGeneration": {
-					"scope": "window",
-					"type": "boolean",
-					"default": true,
-					"description": "Enable the heading generation command."
-				},
-				"blogLsp.commands.enableParagraphCompletion": {
-					"scope": "window",
-					"type": "boolean",
-					"default": true,
-					"description": "Enable the paragraph completion command."
-				}
-			}
-		}
-	},
-	"devDependencies": {
-		"@eslint/js": "^9.13.0",
-		"@stylistic/eslint-plugin": "^2.9.0",
-		"@types/mocha": "^10.0.6",
-		"@types/node": "^22",
-		"eslint": "^9.13.0",
-		"mocha": "^10.3.0",
-		"tsx": "^4.7.0",
-		"typescript": "^5.9.2",
-		"typescript-eslint": "^8.39.0"
-	}
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "clean": "tsc -b -clean",
+    "watch": "tsc -b -w",
+    "lint": "eslint",
+    "postinstall": "cd shared && npm install && cd ../client && npm install && cd ../server && npm install && cd ..",
+    "test": "sh ./scripts/e2e.sh",
+		"test:unit": "mocha",
+		"test:unit:shared": "cd shared && mocha 'src/**/*.test.ts'",
+		"test:unit:server": "cd server && mocha 'src/**/*.test.ts'",
+    "test:llm": "tsx shared/src/scripts/test-llm.ts",
+    "test:llm:build": "npm run compile && node shared/out/scripts/test-llm.js"
+  },
+  "keywords": [
+    "multi-root ready"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "blogLsp.setApiKey",
+        "title": "Set API Key",
+        "category": "Blog LSP"
+      },
+      {
+        "command": "blogLsp.deleteApiKey",
+        "title": "Delete API Key",
+        "category": "Blog LSP"
+      },
+      {
+        "command": "blogLsp.completeSelection",
+        "title": "Complete Selection",
+        "category": "Blog LSP"
+      },
+      {
+        "command": "blogLsp.completeParagraph",
+        "title": "Complete Paragraph",
+        "category": "Blog LSP"
+      },
+      {
+        "command": "blogLsp.insertHeading",
+        "title": "Insert Heading",
+        "category": "Blog LSP"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Blog Language Server configuration",
+      "properties": {
+        "blogLsp.provider": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "openai",
+            "azure-openai"
+          ],
+          "default": "openai",
+          "description": "LLM provider to use for text completion."
+        },
+        "blogLsp.model": {
+          "scope": "window",
+          "type": "string",
+          "default": "gpt-5-nano",
+          "description": "Model name to use for text completion."
+        },
+        "blogLsp.apiBaseUrl": {
+          "scope": "window",
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "description": "API base URL for the LLM provider. Leave empty to use the default URL for the provider."
+        },
+        "blogLsp.apiKey": {
+          "scope": "window",
+          "type": "string",
+          "default": "${env:OPENAI_API_KEY}",
+          "description": "API key for the LLM provider. You can use ${env:VAR_NAME} to reference environment variables."
+        },
+        "blogLsp.maxTokens": {
+          "scope": "window",
+          "type": "number",
+          "default": 128,
+          "description": "Maximum number of tokens to generate for each completion."
+        },
+        "blogLsp.reasoningEffort": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "minimal",
+            "low",
+            "middle",
+            "high"
+          ],
+          "default": "minimal",
+          "description": "Reasoning level for the LLM."
+        },
+        "blogLsp.verbosity": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "low",
+            "middle",
+            "high"
+          ],
+          "default": "low",
+          "description": "Verbosity level for the LLM."
+        },
+        "blogLsp.numSuggestions": {
+          "scope": "window",
+          "type": "number",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Number of completion suggestions to generate."
+        },
+        "blogLsp.style": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "tech-blog",
+            "casual",
+            "formal"
+          ],
+          "default": "tech-blog",
+          "description": "Writing style for generated completions."
+        },
+        "blogLsp.language": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "ja",
+            "en"
+          ],
+          "default": "ja",
+          "description": "Language for generated completions."
+        },
+        "blogLsp.privacy.scope": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "selection",
+            "paragraph",
+            "document"
+          ],
+          "default": "paragraph",
+          "description": "Privacy scope for sending text to LLM. 'selection' sends only selected text, 'paragraph' sends the current paragraph, 'document' sends the entire document."
+        },
+        "blogLsp.enableStreaming": {
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable streaming for completion suggestions (if supported by the provider)."
+        },
+        "blogLsp.timeoutMs": {
+          "scope": "window",
+          "type": "number",
+          "default": 50000,
+          "minimum": 1000,
+          "description": "Timeout in milliseconds for LLM API requests."
+        },
+        "blogLsp.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        },
+        "blogLsp.completion.triggerOnHeading": {
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable heading suggestions when typing '#' character."
+        },
+        "blogLsp.completion.maxHeadingSuggestions": {
+          "scope": "window",
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Maximum number of heading suggestions to generate."
+        },
+        "blogLsp.completion.maxTextSuggestions": {
+          "scope": "window",
+          "type": "number",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Maximum number of text completion suggestions to generate."
+        },
+        "blogLsp.commands.enableHeadingGeneration": {
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the heading generation command."
+        },
+        "blogLsp.commands.enableParagraphCompletion": {
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the paragraph completion command."
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@stylistic/eslint-plugin": "^2.9.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^22",
+    "@types/sinon": "^17.0.4",
+    "eslint": "^9.13.0",
+    "mocha": "^10.3.0",
+    "sinon": "^21.0.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.7.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0"
+  }
 }

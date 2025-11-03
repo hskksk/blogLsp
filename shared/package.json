@@ -31,7 +31,8 @@
   },
   "scripts": {
     "copy-templates": "mkdir -p out/markdown/prompts && cp -r src/markdown/prompts/* out/markdown/prompts/",
-    "postbuild": "npm run copy-templates"
+    "postbuild": "npm run copy-templates",
+    "test": "mocha 'src/**/*.test.ts'"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.6",

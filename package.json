@@ -17,13 +17,18 @@
   "activationEvents": [
     "onLanguage:markdown"
   ],
+  "workspaces": [
+    "shared",
+    "client",
+    "server"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
     "clean": "tsc -b -clean",
     "watch": "tsc -b -w",
     "lint": "eslint",
-    "postinstall": "cd shared && npm install && cd ../client && npm install && cd ../server && npm install && cd ..",
+    "postinstall": "npm -w shared install && npm -w client install && npm -w server install",
     "test": "sh ./scripts/e2e.sh",
 		"test:unit": "TS_NODE_TRANSPILE_ONLY=true mocha",
 		"test:unit:shared": "cd shared && TS_NODE_TRANSPILE_ONLY=true mocha 'src/**/*.test.ts'",

@@ -55,7 +55,6 @@ export function buildSystemPrompt(
   return renderTemplate('system', {
     languageText,
     stylePrompt: effectiveStylePrompt,
-    hasStylePrompt: Boolean(effectiveStylePrompt && effectiveStylePrompt.trim().length > 0),
   }).trim();
 }
 

@@ -25,9 +25,9 @@
     "lint": "eslint",
     "postinstall": "cd shared && npm install && cd ../client && npm install && cd ../server && npm install && cd ..",
     "test": "sh ./scripts/e2e.sh",
-		"test:unit": "mocha",
-		"test:unit:shared": "cd shared && mocha 'src/**/*.test.ts'",
-		"test:unit:server": "cd server && mocha 'src/**/*.test.ts'",
+		"test:unit": "TS_NODE_TRANSPILE_ONLY=true mocha",
+		"test:unit:shared": "cd shared && TS_NODE_TRANSPILE_ONLY=true mocha 'src/**/*.test.ts'",
+		"test:unit:server": "cd server && TS_NODE_TRANSPILE_ONLY=true mocha 'src/**/*.test.ts'",
     "test:llm": "tsx shared/src/scripts/test-llm.ts",
     "test:llm:build": "npm run compile && node shared/out/scripts/test-llm.js"
   },

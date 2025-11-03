@@ -15,7 +15,10 @@ describe('completion-service.ts', () => {
   let mockProvider: sinon.SinonStubbedInstance<LlmProvider>;
 
   beforeEach(() => {
-    mockConnection = sinon.createStubInstance(Connection);
+    // Connection?????????????????????
+    mockConnection = {
+      console: {} as any,
+    } as any;
     completionService = new CompletionService(mockConnection as any);
 
     mockProvider = {

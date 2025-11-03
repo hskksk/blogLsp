@@ -2,7 +2,8 @@ import { describe, it, beforeEach, afterEach } from 'mocha';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { Connection, CompletionParams, TextDocumentIdentifier, Position as LspPosition } from 'vscode-languageserver/node';
-import { TextDocuments, TextDocument } from 'vscode-languageserver-textdocument';
+import { TextDocuments } from 'vscode-languageserver';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import { CompletionHandler } from './completion-handler';
 import { ConfigurationManager } from '../config/manager';
 import type { BlogLspConfig, LlmProvider } from '@blogLsp/shared';
@@ -18,7 +19,18 @@ describe('completion-handler.ts', () => {
   let mockProvider: sinon.SinonStubbedInstance<LlmProvider>;
 
   beforeEach(() => {
-    mockConnection = sinon.createStubInstance(Connection);
+    // Connection?????????????????????
+    mockConnection = {
+      console: {
+        warn: sinon.stub(),
+        error: sinon.stub(),
+        log: sinon.stub(),
+      } as any,
+      window: {
+        showErrorMessage: sinon.stub(),
+        showInformationMessage: sinon.stub(),
+      } as any,
+    } as any;
     documents = new TextDocuments(TextDocument);
     
     // Create a mock document

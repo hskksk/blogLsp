@@ -12,7 +12,12 @@ describe('manager.ts', () => {
   let configManager: ConfigurationManager;
 
   beforeEach(() => {
-    mockConnection = sinon.createStubInstance(Connection);
+    // Connection?????????????????????
+    mockConnection = {
+      workspace: {} as any,
+      console: {} as any,
+      window: {} as any,
+    } as any;
     configManager = new ConfigurationManager(mockConnection as any);
   });
 

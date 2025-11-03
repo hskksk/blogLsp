@@ -17,7 +17,11 @@ describe('completion-service.ts', () => {
   beforeEach(() => {
     // Connection?????????????????????
     mockConnection = {
-      console: {} as any,
+      console: {
+        log: sinon.stub(),
+        error: sinon.stub(),
+        warn: sinon.stub(),
+      } as any,
     } as any;
     completionService = new CompletionService(mockConnection as any);
 

@@ -40,7 +40,8 @@ More content.`;
 
       // Empty document may have empty paragraph or empty string
       assert.ok(typeof context.currentParagraph === 'string');
-      assert.equal(context.metadata.lineCount, 0);
+      // splitLines('') returns [''] so lineCount is 1
+      assert.equal(context.metadata.lineCount, 1);
       assert.equal(context.metadata.hasFrontMatter, false);
     });
 

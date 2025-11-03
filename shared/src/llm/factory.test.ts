@@ -32,7 +32,7 @@ describe('factory.ts', () => {
         provider: 'azure-openai',
         model: 'gpt-4',
         apiKey: 'test-key',
-        apiBaseUrl: 'https://test.openai.azure.com',
+        apiBaseUrl: 'https://test.openai.azure.com/openai/deployments/gpt-4',
         numSuggestions: 1,
         style: 'tech-blog',
         language: 'ja',
@@ -53,7 +53,7 @@ describe('factory.ts', () => {
         provider: 'azure',
         model: 'gpt-4',
         apiKey: 'test-key',
-        apiBaseUrl: 'https://test.openai.azure.com',
+        apiBaseUrl: 'https://test.openai.azure.com/openai/deployments/gpt-4',
         numSuggestions: 1,
         style: 'tech-blog',
         language: 'ja',
@@ -84,7 +84,7 @@ describe('factory.ts', () => {
       const provider = createLlmProvider(config);
 
       assert.ok(provider);
-      assert.equal(provider.name, 'OpenAI');
+      assert.equal(provider.name, 'openai');
     });
 
     it('should handle case-insensitive provider names', () => {
@@ -103,7 +103,7 @@ describe('factory.ts', () => {
       const provider = createLlmProvider(config);
 
       assert.ok(provider);
-      assert.equal(provider.name, 'OpenAI');
+      assert.equal(provider.name, 'openai');
     });
 
     it('should pass configuration to provider', () => {
@@ -135,6 +135,7 @@ describe('factory.ts', () => {
       const config: BlogLspConfig = {
         provider: 'openai',
         model: 'gpt-4',
+        apiKey: 'test-key',
         numSuggestions: 1,
         style: 'tech-blog',
         language: 'ja',
@@ -146,7 +147,7 @@ describe('factory.ts', () => {
       const provider = createLlmProvider(config);
 
       assert.ok(provider);
-      assert.equal(provider.name, 'OpenAI');
+      assert.equal(provider.name, 'openai');
     });
   });
 

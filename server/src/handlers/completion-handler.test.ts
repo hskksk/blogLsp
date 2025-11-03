@@ -13,7 +13,7 @@ import type { CompletionSettings } from '../config/types';
 
 describe('completion-handler.ts', () => {
   let mockConnection: sinon.SinonStubbedInstance<Connection>;
-  let documents: TextDocuments<TextDocument>;
+  let documents: sinon.SinonStubbedInstance<TextDocuments<TextDocument>>;
   let mockConfigManager: sinon.SinonStubbedInstance<ConfigurationManager>;
   let completionHandler: CompletionHandler;
   let mockProvider: sinon.SinonStubbedInstance<LlmProvider>;
@@ -31,7 +31,6 @@ describe('completion-handler.ts', () => {
         showInformationMessage: sinon.stub(),
       } as any,
     } as any;
-    documents = new TextDocuments(TextDocument);
     
     // Create a mock document
     const document = TextDocument.create(
@@ -47,7 +46,11 @@ Another line.
 
 More content.`
     );
-    documents.set(document);
+    
+    // Mock TextDocuments
+    documents = {
+      get: sinon.stub().returns(document),
+    } as any;
 
     mockConfigManager = sinon.createStubInstance(ConfigurationManager);
     
@@ -181,7 +184,7 @@ More content.`
           1,
           ''
         );
-        documents.set(emptyDoc);
+        (documents.get as sinon.SinonStub).withArgs('file:///empty.md').returns(emptyDoc);
 
         mockConfigManager.getCurrentConfig!.returns(mockConfig);
         mockConfigManager.getLlmProvider!.returns(mockProvider as any);

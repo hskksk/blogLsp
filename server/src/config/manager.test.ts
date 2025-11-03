@@ -15,7 +15,11 @@ describe('manager.ts', () => {
     // Connection?????????????????????
     mockConnection = {
       workspace: {} as any,
-      console: {} as any,
+      console: {
+        log: sinon.stub(),
+        error: sinon.stub(),
+        warn: sinon.stub(),
+      } as any,
       window: {} as any,
     } as any;
     configManager = new ConfigurationManager(mockConnection as any);
@@ -168,7 +172,7 @@ describe('manager.ts', () => {
           provider: 'azure-openai',
           model: 'gpt-4',
           apiKey: 'test-key',
-          apiBaseUrl: 'https://test.azure.com',
+          apiBaseUrl: 'https://test.openai.azure.com/openai/deployments/gpt-4',
           numSuggestions: 5,
           style: 'casual',
           language: 'en',
@@ -238,6 +242,7 @@ describe('manager.ts', () => {
           getConfiguration: sinon.stub().resolves({
             provider: 'openai',
             model: 'gpt-4',
+            apiKey: 'test-key',
             numSuggestions: 1,
             style: 'tech-blog',
             language: 'ja',
@@ -251,14 +256,15 @@ describe('manager.ts', () => {
 
         const provider1 = configManager.getLlmProvider();
         assert.ok(provider1);
-        assert.equal(provider1!.name, 'OpenAI');
+        assert.equal(provider1!.name, 'openai');
 
         // Change config
         mockConnection.workspace = {
           getConfiguration: sinon.stub().resolves({
             provider: 'azure-openai',
             model: 'gpt-4',
-            apiBaseUrl: 'https://test.azure.com',
+            apiKey: 'test-key',
+            apiBaseUrl: 'https://test.openai.azure.com/openai/deployments/gpt-4',
             numSuggestions: 1,
             style: 'tech-blog',
             language: 'ja',

@@ -9,8 +9,8 @@ import type {
 } from './types';
 
 /**
- * ???????
- * ????????????????
+ * Configuration Manager
+ * Manages configuration retrieval, initialization, and updates
  */
 export class ConfigurationManager {
   private connection: Connection;
@@ -23,36 +23,36 @@ export class ConfigurationManager {
   }
 
   /**
-   * ???????????
+   * Set configuration capability
    */
   setConfigurationCapability(hasCapability: boolean): void {
     this.hasConfigurationCapability = hasCapability;
   }
 
   /**
-   * ???????????
+   * Get configuration capability status
    */
   hasCapability(): boolean {
     return this.hasConfigurationCapability;
   }
 
   /**
-   * ????????
+   * Get current configuration
    */
   getCurrentConfig(): ServerConfig | null {
     return this.currentConfig;
   }
 
   /**
-   * ???LLM????????
+   * Get current LLM provider
    */
   getLlmProvider(): LlmProvider | null {
     return this.llmProvider;
   }
 
   /**
-   * VS Code????BlogLspConfig???
-   * ??: ????????????API????????????????????
+   * Get BlogLspConfig from VS Code settings
+   * Note: API keys from secret storage can only be obtained via initialization options
    */
   async getConfiguration(): Promise<ServerConfig | null> {
     if (!this.hasConfigurationCapability) {
@@ -62,7 +62,7 @@ export class ConfigurationManager {
     try {
       const config = await this.connection.workspace.getConfiguration('blogLsp');
 
-      // ??????API?????????${env:VAR_NAME}??????
+      // Get API key from environment variable if configured as ${env:VAR_NAME}
       let apiKey = config.apiKey;
       if (
         apiKey &&
@@ -74,15 +74,15 @@ export class ConfigurationManager {
         apiKey = process.env[envVarName] || apiKey;
       }
 
-      // ????????????API?????????????????????????
-      // ????????????????????????????currentConfig????
+      // API key from secret storage should already be set via initialization options
+      // Here we only get values from config file (use existing currentConfig if empty)
       const blogLspConfig: ServerConfig = {
         provider: config.provider || 'openai',
         model: config.model || 'gpt-4.1-nano',
         apiBaseUrl: config.apiBaseUrl,
-        apiKey: this.currentConfig?.apiKey || apiKey, // ???API?????
-        maxTokens: config.maxTokens, // ???????gpt-5?????????
-        temperature: config.temperature, // ???????gpt-5?????????
+        apiKey: this.currentConfig?.apiKey || apiKey, // Preserve existing API key
+        maxTokens: config.maxTokens, // Optional (not used for gpt-5 series)
+        temperature: config.temperature, // Optional (not used for gpt-5 series)
         numSuggestions: config.numSuggestions || 1,
         style: config.style || 'tech-blog',
         language: config.language || 'ja',
@@ -91,8 +91,8 @@ export class ConfigurationManager {
         },
         enableStreaming: config.enableStreaming || false,
         timeoutMs: config.timeoutMs || 50000,
-        reasoningEffort: config.reasoningEffort, // gpt-5????
-        verbosity: config.verbosity, // gpt-5????
+        reasoningEffort: config.reasoningEffort, // Used for gpt-5 series
+        verbosity: config.verbosity, // Used for gpt-5 series
       };
 
       return blogLspConfig;
@@ -103,7 +103,7 @@ export class ConfigurationManager {
   }
 
   /**
-   * ???????????????
+   * Update configuration from initialization options
    */
   async updateConfigurationFromInit(initConfig: InitConfigOptions): Promise<void> {
     try {
@@ -112,8 +112,8 @@ export class ConfigurationManager {
         model: initConfig.model || 'gpt-4.1-nano',
         apiBaseUrl: initConfig.apiBaseUrl,
         apiKey: initConfig.apiKey,
-        maxTokens: initConfig.maxTokens, // ???????gpt-5?????????
-        temperature: initConfig.temperature, // ???????gpt-5?????????
+        maxTokens: initConfig.maxTokens, // Optional (not used for gpt-5 series)
+        temperature: initConfig.temperature, // Optional (not used for gpt-5 series)
         numSuggestions: initConfig.numSuggestions || 2,
         style: initConfig.style || 'tech-blog',
         language: initConfig.language || 'ja',
@@ -122,8 +122,8 @@ export class ConfigurationManager {
         },
         enableStreaming: initConfig.enableStreaming || false,
         timeoutMs: initConfig.timeoutMs || 20000,
-        reasoningEffort: initConfig.reasoningEffort, // gpt-5????
-        verbosity: initConfig.verbosity, // gpt-5????
+        reasoningEffort: initConfig.reasoningEffort, // Used for gpt-5 series
+        verbosity: initConfig.verbosity, // Used for gpt-5 series
       };
 
       this.currentConfig = blogLspConfig;
@@ -137,7 +137,7 @@ export class ConfigurationManager {
   }
 
   /**
-   * ???????LLM??????????
+   * Update configuration and reinitialize LLM provider
    */
   async updateConfiguration(): Promise<void> {
     const newConfig = await this.getConfiguration();
@@ -160,7 +160,7 @@ export class ConfigurationManager {
   }
 
   /**
-   * ??????????
+   * Get completion settings
    */
   async getCompletionSettings(): Promise<CompletionSettings> {
     if (!this.hasConfigurationCapability) {
@@ -189,7 +189,7 @@ export class ConfigurationManager {
   }
 
   /**
-   * ????????????
+   * Get command settings
    */
   async getCommandSettings(): Promise<CommandSettings> {
     if (!this.hasConfigurationCapability) {

@@ -19,10 +19,10 @@ import type { InitConfigOptions } from './config/types';
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
-// 設定管理マネージャー
+// Configuration Manager
 const configManager = new ConfigurationManager(connection);
 
-// ハンドラー
+// Handlers
 const completionHandler = new CompletionHandler(
   connection,
   documents,
@@ -48,7 +48,7 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
 
   configManager.setConfigurationCapability(hasConfigurationCapability);
 
-  // デバッグ: 初期化オプションをログ出力
+  // Debug: log initialization options
   connection.console.log(
     `Initialization options received: ${JSON.stringify(
       params.initializationOptions
@@ -57,7 +57,7 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
     )}`
   );
 
-  // 初期化オプションから設定を取得（Client側からシークレットを含めて送られる）
+  // Get configuration from initialization options (secrets are sent from client)
   if (params.initializationOptions) {
     try {
       const initConfig = params.initializationOptions as InitConfigOptions;
@@ -69,7 +69,7 @@ connection.onInitialize(async (params: InitializeParams): Promise<InitializeResu
       connection.console.log(`Has API key: ${!!initConfig.apiKey}`);
 
       if (initConfig.apiKey) {
-        // 初期化時に設定を適用
+        // Apply configuration at initialization
         await configManager.updateConfigurationFromInit(initConfig);
       } else {
         connection.console.warn('API key not found in initialization options');
@@ -116,32 +116,32 @@ connection.onInitialized(async () => {
   }
 });
 
-// 設定変更を監視
+// Monitor configuration changes
 connection.onDidChangeConfiguration(async () => {
   await configManager.updateConfiguration();
 });
 
-// 補完ハンドラー
+// Completion Handler
 connection.onCompletion(async (params) => {
   return completionHandler.handleCompletion(params);
 });
 
-// ドキュメントシンボルハンドラー
+// Document Symbol Handler
 connection.onDocumentSymbol(async (params) => {
   return documentSymbolHandler.handleDocumentSymbol(params);
 });
 
-// ホバーハンドラー
+// Hover Handler
 connection.onHover(async (params) => {
   return hoverHandler.handleHover(params);
 });
 
-// コマンドハンドラー
+// Command Handler
 connection.onExecuteCommand(async (params) => {
   return commandHandler.handleExecuteCommand(params);
 });
 
-// コードアクションハンドラー
+// Code Action Handler
 connection.onCodeAction(async (params) => {
   return codeActionHandler.handleCodeAction(params);
 });

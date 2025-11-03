@@ -1,14 +1,14 @@
 import type { BlogLspConfig } from '@blogLsp/shared';
 
 /**
- * ????????????????
+ * Extended configuration type for server-side use
  */
 export interface ServerConfig extends BlogLspConfig {
-  // ?????????????????????
+  // Add server-specific configuration items as needed
 }
 
 /**
- * ???????
+ * Completion feature settings
  */
 export interface CompletionSettings {
   triggerOnHeading: boolean;
@@ -17,7 +17,7 @@ export interface CompletionSettings {
 }
 
 /**
- * ?????????
+ * Command feature settings
  */
 export interface CommandSettings {
   enableHeadingGeneration: boolean;
@@ -25,7 +25,7 @@ export interface CommandSettings {
 }
 
 /**
- * ????????????
+ * Initialization options type definition
  */
 export interface InitConfigOptions {
   provider?: string;

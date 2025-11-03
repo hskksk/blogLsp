@@ -7,8 +7,8 @@ import { ensureConfiguration } from '../utils/error-handler';
 import { CompletionService } from '../services/completion-service';
 
 /**
- * ???????
- * ????????????????
+ * Completion Handler
+ * Handles heading completion and regular text completion
  */
 export class CompletionHandler {
   private completionService: CompletionService;
@@ -22,11 +22,11 @@ export class CompletionHandler {
   }
 
   /**
-   * ?????
+   * Generate completions
    */
   async handleCompletion(params: CompletionParams) {
     try {
-      // ???????????
+      // Check configuration and provider
       const config = this.configManager.getCurrentConfig();
       const provider = this.configManager.getLlmProvider();
       const configCheck = await ensureConfiguration(
@@ -40,7 +40,7 @@ export class CompletionHandler {
         return [];
       }
 
-      // ?????????
+      // Get document
       const document = this.documents.get(params.textDocument.uri);
       if (!document) {
         this.connection.console.warn(
@@ -52,22 +52,22 @@ export class CompletionHandler {
       const text = document.getText();
       const position = params.position;
 
-      // ??????????
+      // Extract context lines
       const context = extractContextLines(text, position, 5, 5);
 
       if (!context.currentLine) {
         return [];
       }
 
-      // ???????
+      // Get completion settings
       const completionSettings = await this.configManager.getCompletionSettings();
 
-      // ????????????????
+      // Check trigger character and trigger kind
       const triggerCharacter = params.context?.triggerCharacter;
       const triggerKind = params.context?.triggerKind;
 
-      // ?????????#???????????????#??????????
-      // ??????????????????????????????
+      // Heading completion case (# is trigger character, or current line starts with #)
+      // Falls back to regular completion if disabled in settings
       const isHeadingCompletion =
         completionSettings.triggerOnHeading &&
         (triggerCharacter === '#' ||

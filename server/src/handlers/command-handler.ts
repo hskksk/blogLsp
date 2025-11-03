@@ -10,8 +10,8 @@ import { ensureConfiguration } from '../utils/error-handler';
 import { CommandService } from '../services/command-service';
 
 /**
- * ?????????
- * ?????????????????
+ * Command Handler
+ * Separates each command processing as methods
  */
 export class CommandHandler {
   private commandService: CommandService;
@@ -25,7 +25,7 @@ export class CommandHandler {
   }
 
   /**
-   * ???????????
+   * Command execution handler
    */
   async handleExecuteCommand(params: ExecuteCommandParams) {
     try {
@@ -45,12 +45,12 @@ export class CommandHandler {
       const command = params.command;
       const args = params.arguments || [];
 
-      // ??????????????
+      // Get command settings and completion settings
       const commandSettings = await this.configManager.getCommandSettings();
       const completionSettings = await this.configManager.getCompletionSettings();
 
       if (command === 'blogLsp.completeSelection') {
-        // ??????????
+        // Generate continuation of selected range
         const uri = args[0] as string;
         const range = args[1] as LspRange;
         const selectedText = args[2] as string;
@@ -70,7 +70,7 @@ export class CommandHandler {
           );
           return;
         }
-        // ????????
+        // Complete paragraph
         const uri = args[0] as string;
         const position = args[1] as { line: number; character: number };
 
@@ -88,7 +88,7 @@ export class CommandHandler {
           );
           return;
         }
-        // ????????
+        // Insert heading suggestion
         const uri = args[0] as string;
         const position = args[1] as { line: number; character: number };
 

@@ -4,8 +4,8 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import type { ConfigurationManager } from '../config/manager';
 
 /**
- * ?????????????
- * ??????????????
+ * Code Action Handler
+ * Generates code actions
  */
 export class CodeActionHandler {
   constructor(
@@ -15,7 +15,7 @@ export class CodeActionHandler {
   ) {}
 
   /**
-   * ?????????????
+   * Code Action Handler
    */
   async handleCodeAction(params: CodeActionParams): Promise<CodeAction[]> {
     try {
@@ -24,64 +24,64 @@ export class CodeActionHandler {
         return [];
       }
 
-      // ?????????
+      // Get command settings
       const commandSettings = await this.configManager.getCommandSettings();
 
       const actions: CodeAction[] = [];
       const range = params.range;
 
-      // ?????????
+      // If there is a selection range
       if (
         range.start.line !== range.end.line ||
         range.start.character !== range.end.character
       ) {
         const selectedText = document.getText(range);
 
-        // ????????????
+        // "Generate continuation" action
         actions.push({
-          title: '?????',
+          title: 'Generate continuation',
           kind: 'source.fixAll',
           command: {
             command: 'blogLsp.completeSelection',
-            title: '?????',
+            title: 'Generate continuation',
             arguments: [params.textDocument.uri, range, selectedText],
           },
         });
       } else {
-        // ???????????
+        // Cursor position only
         const position = range.start;
         const line = document.getText({
           start: { line: position.line, character: 0 },
           end: { line: position.line, character: Number.MAX_SAFE_INTEGER },
         });
 
-        // ??????????????????????????????????
+        // Paragraph completion action (only if line is not empty and enabled in settings)
         if (
           line.trim().length > 0 &&
           commandSettings.enableParagraphCompletion
         ) {
           actions.push({
-            title: '?????',
+            title: 'Complete paragraph',
             kind: 'source.fixAll',
             command: {
               command: 'blogLsp.completeParagraph',
-              title: '?????',
+              title: 'Complete paragraph',
               arguments: [params.textDocument.uri, position],
             },
           });
         }
 
-        // ?????????????#??????????????????????????????
+        // Insert heading suggestion (only if current line starts with # or is empty, and enabled in settings)
         if (
           (line.trim().startsWith('#') || line.trim().length === 0) &&
           commandSettings.enableHeadingGeneration
         ) {
           actions.push({
-            title: '????????',
+            title: 'Insert heading suggestion',
             kind: 'source.fixAll',
             command: {
               command: 'blogLsp.insertHeading',
-              title: '????????',
+              title: 'Insert heading suggestion',
               arguments: [params.textDocument.uri, position],
             },
           });

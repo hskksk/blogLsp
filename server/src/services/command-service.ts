@@ -11,8 +11,8 @@ import {
 import type { CompletionSettings } from '../config/types';
 
 /**
- * ????????
- * ??????????????????
+ * Command Service
+ * Separates business logic for command execution
  */
 export class CommandService {
   constructor(
@@ -21,7 +21,7 @@ export class CommandService {
   ) {}
 
   /**
-   * ??????????
+   * Generate continuation of selected range
    */
   async completeSelection(
     uri: string,
@@ -61,7 +61,7 @@ export class CommandService {
     }
 
     let completion = completions[0];
-    // currentText???
+    // Remove currentText from completion
     const textToComplete = selectedText || context.currentText;
     if (completion.startsWith(textToComplete)) {
       completion = completion.substring(textToComplete.length);
@@ -92,7 +92,7 @@ export class CommandService {
   }
 
   /**
-   * ????????
+   * Complete paragraph
    */
   async completeParagraph(
     uri: string,
@@ -121,7 +121,7 @@ export class CommandService {
     const completions = await provider.generateCompletions({
       prompt,
       language: config.language,
-      maxTokens: config.maxTokens ? config.maxTokens * 2 : undefined, // ???????????
+      maxTokens: config.maxTokens ? config.maxTokens * 2 : undefined, // Generate longer text
       temperature: config.temperature,
       numSuggestions: completionSettings.maxTextSuggestions,
     });
@@ -132,7 +132,7 @@ export class CommandService {
     }
 
     let completion = completions[0];
-    // currentText???
+    // Remove currentText from completion
     if (completion.startsWith(context.currentText)) {
       completion = completion.substring(context.currentText.length);
     }
@@ -162,7 +162,7 @@ export class CommandService {
   }
 
   /**
-   * ????????
+   * Insert heading suggestion
    */
   async insertHeading(
     uri: string,
@@ -204,7 +204,7 @@ export class CommandService {
     }
 
     let headingText = headings[0].trim();
-    // currentText??#???
+    // Extract # from currentText
     const headingPrefix = context.currentText.match(/^#+\s*/)?.[0] || '# ';
     const fullHeading = headingPrefix + headingText;
 

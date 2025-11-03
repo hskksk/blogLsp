@@ -11,14 +11,14 @@ import type { CompletionSettings } from '../config/types';
 import type { Position } from '@blogLsp/shared';
 
 /**
- * ??????
- * ????????????????
+ * Completion Service
+ * Separates business logic for completion generation
  */
 export class CompletionService {
   constructor(private connection: Connection) {}
 
   /**
-   * ????????
+   * Generate heading completion
    */
   async generateHeadingCompletion(
     context: {
@@ -32,7 +32,7 @@ export class CompletionService {
     provider: LlmProvider,
     completionSettings: CompletionSettings
   ) {
-    // ?????????????
+    // Use heading completion prompt
     const prompt = buildHeadingSuggestionPrompt({
       linesBefore: context.linesBefore,
       currentLine: context.currentLine,
@@ -44,7 +44,7 @@ export class CompletionService {
       `Generating heading suggestions with prompt length: ${prompt.length}`
     );
 
-    // LLM?????????
+    // Generate heading candidates with LLM
     const headings = await provider.generateCompletions({
       prompt,
       language: config.language,
@@ -53,7 +53,7 @@ export class CompletionService {
       numSuggestions: completionSettings.maxHeadingSuggestions,
     });
 
-    // ???CompletionItem???
+    // Convert to heading CompletionItems
     const completionItems = buildHeadingCompletionItems({
       completions: headings,
       position,
@@ -68,7 +68,7 @@ export class CompletionService {
   }
 
   /**
-   * ?????????
+   * Generate text completion
    */
   async generateTextCompletion(
     context: {
@@ -82,7 +82,7 @@ export class CompletionService {
     provider: LlmProvider,
     completionSettings: CompletionSettings
   ) {
-    // ???????????????
+    // Use regular text completion prompt
     const prompt = buildCompletionPrompt({
       currentText: context.currentText,
       linesBefore: context.linesBefore,
@@ -94,7 +94,7 @@ export class CompletionService {
       `Generating text completions with prompt length: ${prompt.length}`
     );
 
-    // LLM??????
+    // Generate completions with LLM
     const completions = await provider.generateCompletions({
       prompt,
       language: config.language,
@@ -103,7 +103,7 @@ export class CompletionService {
       numSuggestions: completionSettings.maxTextSuggestions,
     });
 
-    // CompletionItem???
+    // Convert to CompletionItems
     const completionItems = buildCompletionItems({
       completions,
       position,

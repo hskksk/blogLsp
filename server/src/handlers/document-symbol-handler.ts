@@ -4,8 +4,8 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { extractHeadings } from '@blogLsp/shared';
 
 /**
- * ???????????????
- * ????????
+ * Document Symbol Handler
+ * Returns heading hierarchy
  */
 export class DocumentSymbolHandler {
   constructor(
@@ -14,7 +14,7 @@ export class DocumentSymbolHandler {
   ) {}
 
   /**
-   * ????????????????????
+   * Return document symbols (heading hierarchy)
    */
   async handleDocumentSymbol(params: DocumentSymbolParams) {
     try {

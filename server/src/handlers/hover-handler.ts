@@ -8,8 +8,8 @@ import {
 } from '@blogLsp/shared';
 
 /**
- * ????????
- * ????????
+ * Hover Handler
+ * Returns hover information
  */
 export class HoverHandler {
   constructor(
@@ -18,7 +18,7 @@ export class HoverHandler {
   ) {}
 
   /**
-   * ????????
+   * Return hover information
    */
   async handleHover(params: HoverParams): Promise<Hover | null> {
     try {
@@ -33,16 +33,16 @@ export class HoverHandler {
       const text = document.getText();
       const position = params.position;
 
-      // ???????????????????
+      // Check if the line at cursor position is a heading
       const currentHeading = isHeadingAtPosition(text, position);
 
       if (currentHeading) {
-        // ????????????: ??????????
+        // When hovering over a heading: also show next heading information
         {
           const nextHeading = findNextHeading(text, currentHeading.line);
 
           const parts: string[] = [];
-          parts.push(`**?????? ${currentHeading.level}**`);
+          parts.push(`**Heading Level ${currentHeading.level}**`);
           parts.push('');
           parts.push(currentHeading.text);
 
@@ -50,11 +50,11 @@ export class HoverHandler {
             parts.push('');
             parts.push('---');
             parts.push('');
-            parts.push('**?????**:');
-            parts.push(`??? ${nextHeading.level}: ${nextHeading.text}`);
+            parts.push('**Next Heading**:');
+            parts.push(`Level ${nextHeading.level}: ${nextHeading.text}`);
           } else {
             parts.push('');
-            parts.push('_?????????????????????_');
+            parts.push('_(No next heading after this heading)_');
           }
 
           return {
@@ -65,23 +65,23 @@ export class HoverHandler {
           };
         }
       } else {
-        // ???????: ?????????????
+        // When hovering over regular text: show current section information
         const nearestHeading = findNearestHeadingBefore(text, position);
 
         if (nearestHeading) {
           const parts: string[] = [];
-          parts.push('**????????**');
+          parts.push('**Current Section**');
           parts.push('');
-          parts.push(`??? ${nearestHeading.level}: ${nearestHeading.text}`);
+          parts.push(`Level ${nearestHeading.level}: ${nearestHeading.text}`);
 
-          // ????????
+          // Also show next heading
           const nextHeading = findNextHeading(text, nearestHeading.line);
           if (nextHeading) {
             parts.push('');
             parts.push('---');
             parts.push('');
-            parts.push('**???????**:');
-            parts.push(`??? ${nextHeading.level}: ${nextHeading.text}`);
+            parts.push('**Next Section**:');
+            parts.push(`Level ${nextHeading.level}: ${nextHeading.text}`);
           }
 
           return {
@@ -93,7 +93,7 @@ export class HoverHandler {
         }
       }
 
-      // ?????????????null????????????????
+      // Return null if no heading found (don't show hover information)
       return null;
     } catch (error) {
       this.connection.console.error(

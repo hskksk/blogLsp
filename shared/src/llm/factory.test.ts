@@ -166,6 +166,26 @@ describe('factory.ts', () => {
       assert.equal(provider.name, 'openai');
     });
 
+    it('should not require apiKey for openai-compatible with localhost base URL', () => {
+      const config: BlogLspConfig = {
+        provider: 'openai-compatible',
+        model: 'llama3.1:8b',
+        // apiKey intentionally omitted
+        numSuggestions: 1,
+        style: 'tech-blog',
+        language: 'ja',
+        privacy: { scope: 'paragraph' },
+        enableStreaming: false,
+        timeoutMs: 5000,
+        apiBaseUrl: 'http://localhost:11434/v1',
+      } as any;
+
+      const provider = createLlmProvider(config);
+
+      assert.ok(provider);
+      assert.equal(provider.name, 'openai');
+    });
+
     it('should pass configuration to provider', () => {
       const config: BlogLspConfig = {
         provider: 'openai',

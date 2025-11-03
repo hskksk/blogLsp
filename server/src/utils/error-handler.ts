@@ -31,6 +31,28 @@ export async function checkConfiguration(
     return null;
   }
 
+  // Validate API key requirements with relaxed rules for OpenAI-compatible/local providers
+  const providerId = String(config.provider || '').toLowerCase();
+  const apiBaseUrl = config.apiBaseUrl || '';
+  const apiKey = config.apiKey || '';
+
+  const isLocalhostBase = /^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?\//i.test(apiBaseUrl);
+  const isOpenAICompatible = providerId === 'openai-compatible' || providerId === 'local-openai' || providerId === 'local';
+
+  if (!apiKey) {
+    if (isOpenAICompatible || isLocalhostBase) {
+      connection.console.warn(
+        '[Config] API key is missing, but allowed for openai-compatible/local providers or localhost base URL.'
+      );
+    } else {
+      connection.window.showErrorMessage(
+        'Blog LSP: API key is required for the selected provider. Set blogLsp.apiKey or use the "Blog LSP: Set API Key" command.'
+      );
+      connection.console.error('[Config] Missing API key for non-local/non-openai-compatible provider');
+      return null;
+    }
+  }
+
   return {
     isValid: true,
     config,

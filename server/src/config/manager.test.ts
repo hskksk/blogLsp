@@ -206,6 +206,40 @@ describe('manager.ts', () => {
         assert.equal(config!.numSuggestions, 2);
         assert.equal(config!.style, 'tech-blog');
       });
+
+      it('should initialize provider without apiKey for openai-compatible on localhost', async () => {
+        const initConfig: InitConfigOptions = {
+          provider: 'openai-compatible',
+          model: 'llama3.1:8b',
+          apiBaseUrl: 'http://localhost:11434/v1',
+          // apiKey omitted intentionally
+        };
+
+        await configManager.updateConfigurationFromInit(initConfig);
+
+        const cfg = configManager.getCurrentConfig();
+        const prov = configManager.getLlmProvider();
+        assert.ok(cfg);
+        assert.ok(prov);
+        assert.equal(prov!.name, 'openai');
+      });
+
+      it('should initialize provider without apiKey for local provider on localhost', async () => {
+        const initConfig: InitConfigOptions = {
+          provider: 'local',
+          model: 'llama3.1:8b',
+          apiBaseUrl: 'http://127.0.0.1:11434/v1',
+          // apiKey omitted intentionally
+        };
+
+        await configManager.updateConfigurationFromInit(initConfig);
+
+        const cfg = configManager.getCurrentConfig();
+        const prov = configManager.getLlmProvider();
+        assert.ok(cfg);
+        assert.ok(prov);
+        assert.equal(prov!.name, 'openai');
+      });
     });
 
     describe('updateConfiguration', () => {

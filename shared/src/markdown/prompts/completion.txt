@@ -1,16 +1,14 @@
 {{systemPrompt}}
 
-Context information (JSON):
+[Context Data]
 
-JSON Structure:
-- linesBefore (array, optional): Up to 5 lines before the cursor position
-- currentText (string, required): Text from the start of current line to cursor position
-- linesAfter (array, optional): Up to 5 lines after the cursor position
-
-JSON Data:
 {{contextJson}}
 
-Continue writing from the currentText, but do not repeat the currentText itself in the output. Generate only the continuation.
-Each continuation should be concise, about 1-2 sentences long.
-Maintain the same tone and style.
+[Task]
+Article Title: {{contextJson.articleTitle}}
+Current Section: {{contextJson.currentSectionHeading}}
 
+Generate **one single, complete sentence** that naturally continues and finishes the `currentText`.
+- The sentence must be highly relevant to the `currentSectionHeading` and logically follow the `linesBefore`.
+- **Do not generate a full paragraph.** The goal is to complete the user's current thought in one concise sentence.
+- Do not repeat the `currentText`.

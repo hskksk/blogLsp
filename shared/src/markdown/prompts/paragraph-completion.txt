@@ -1,14 +1,14 @@
 {{systemPrompt}}
 
-Context information (JSON):
+[Context Data]
 
-JSON Structure:
-- linesBefore (array, optional): Up to 5 lines before the cursor position
-- currentText (string, required): Text from the start of current line to cursor position, or selected text to complete
-- linesAfter (array, optional): Up to 5 lines after the cursor position
+{{{contextJsonString}}}
 
-JSON Data:
-{{contextJson}}
+[Task]
+Article Title: {{contextJson.articleTitle}}
+Current Section: {{contextJson.currentSectionHeading}}
 
-Complete the paragraph starting from the currentText. Generate a full, well-structured paragraph that naturally continues and concludes the thought. Do not repeat the currentText itself in the output. Generate a complete paragraph (3-5 sentences) that maintains the same tone and style.
-
+Generate a complete, natural paragraph (approx. 3-5 sentences) that continues directly from the `currentText`.
+- The paragraph must be highly relevant to the `currentSectionHeading`.
+- It must logically follow the `linesBefore` and connect to the `linesAfter`.
+- Do not repeat the `currentText`.

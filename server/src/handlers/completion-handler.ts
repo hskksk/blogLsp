@@ -78,6 +78,7 @@ export class CompletionHandler {
       if (isHeadingCompletion) {
         completionItems = await this.completionService.generateHeadingCompletion(
           context,
+          text,
           position,
           configCheck.config,
           configCheck.provider,
@@ -86,6 +87,7 @@ export class CompletionHandler {
       } else {
         completionItems = await this.completionService.generateTextCompletion(
           context,
+          text,
           position,
           configCheck.config,
           configCheck.provider,

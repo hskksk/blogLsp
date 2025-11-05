@@ -1,16 +1,29 @@
 {{systemPrompt}}
 
-Context information (JSON):
+[Context Data]
 
-JSON Structure:
-- linesBefore (array, optional): Up to 5 lines before the cursor position
-- currentLine (string, required): Current line text
-- linesAfter (array, optional): Up to 5 lines after the cursor position
+{{{contextJsonString}}}
 
-JSON Data:
-{{contextJson}}
+[Task]
+Article Title: {{contextJson.articleTitle}}
+Article Structure So Far: {{contextJson.articleSectionStructure}}
+{{#suggestSubSectionHeading}}
+Current Parent Section: {{contextJson.currentSectionHeading}}
 
-Suggest appropriate headings for the content in the context above.
-Suggest {{numSuggestions}} appropriate headings in {{language}}.
-Return only the heading text, one per line, without the # markdown syntax.
+Suggest a **new sub-section heading** (e.g., `## New Sub-Topic`) that fits *inside* the `Current Parent Section`.
+- The suggestion must logically follow the `linesBefore` text.
+- It must be a new topic, not repeating headings already in `Article Structure So Far`.
+- It must be relevant to the `articleTitle`.
+- **Output the heading title text ONLY (e.g., "A New Model").** - Do not include the Markdown prefix (like `##`) as the user has already typed it.
+{{/suggestSubSectionHeading}}
 
+{{#suggestNextSectionHeading}}
+Last Section Finished: {{contextJson.currentSectionHeading}}
+
+Suggest the **next logical main section heading** (e.g., `# New Main Topic`) for the article.
+- The suggestion must logically follow the `Last Section Finished`.
+- It must be a new topic, not repeating those in `Article Structure So Far`.
+- It must be relevant to the `articleTitle`.
+- **Output the heading title text ONLY (e.g., "Implementation Method").**
+- Do not include the Markdown prefix (like `#`) as the user has already typed it.
+{{/suggestNextSectionHeading}}

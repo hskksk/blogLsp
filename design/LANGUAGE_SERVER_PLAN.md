@@ -9,13 +9,14 @@
 
 - **文章補完**: カーソル位置の前後文脈を LLM に渡して自然な続きの文を提案
 - **見出し補完**: `#` トリガー時に見出し案を生成
-- **トーン/文体制御**: 設定でトーン（カジュアル/フォーマル/技術ブログ向け）を選択（enum形式）
-  - 将来的には `.blog-lsp.toml` で複数行の自然言語スタイルプロンプトを記述可能に予定
+- **トーン/文体制御**: 設定で文体を制御
+  - **複数行スタイルプロンプト**: `blogLsp.stylePrompt` で任意の複数行プロンプトを指定可能（デフォルトのスタイルテンプレートを上書き）
 - **候補の複数提示**: 1〜10 件（設定可能、デフォルト: 1件）
 - **ユーザープロンプト補助**: ブログ記事のセクション構成提案（見出し案）
 - **プライバシー制御**: 選択範囲のみ/段落単位/ドキュメント全体など送信範囲を選択
 - **コマンド**: `completeSelection`, `completeParagraph`, `insertHeading`
 - **LSP機能**: `completion`, `documentSymbol`, `hover`, `codeAction`
+‑ **ワークスペース設定ファイルの読込**: `.blog-lsp.toml`（優先）/`.blog-lsp.yml` をワークスペースルートから読込（TOML > YAML > VS Code設定）。保存の自動検知は未対応
 
 ### ⚠️ 部分的実装
 
@@ -26,12 +27,9 @@
 
 ### ❌ 未実装
 
-- **ワークスペース設定ファイル**: `.blog-lsp.toml` または `.blog-lsp.yml` の読み込み機能
-  - TOML/YAML形式で複数行のスタイルプロンプトを記述可能
-  - リポジトリ管理に適した設定ファイル形式（Prettier/ESLintのパターンに準拠）
 - **テレメトリ**: 成功/失敗カウントなどの収集機能
 - **キャッシュ**: 同一文脈・同一設定の短期メモ化
-- **追加プロバイダ**: Anthropic, Google, Local（OpenAI互換のみ実装済み）
+- **追加プロバイダ**: Google（OpenAI/Azure/Anthropic/Local(OpenAI互換) は実装済み）
 - **E2Eテスト**: 手動E2Eテストは未整備
 
 ## アーキテクチャ
@@ -48,13 +46,13 @@
   - LLM プロバイダ抽象化レイヤ:
     - ✅ OpenAI（LangChain経由）
     - ✅ Azure OpenAI（LangChain経由）
-    - ❌ Anthropic（未実装）
+    - ✅ Anthropic（LangChain経由）
     - ❌ Google（未実装）
-    - ❌ Local/OpenAI互換（未実装）
+    - ✅ Local/OpenAI互換（OpenAI互換エンドポイント・ローカル対応）
 
 - **共通**
   - 設定読込: VS Code 設定 + 環境変数参照 (`${env:VAR_NAME}`) + VS Code シークレットストレージ ✅
-  - ワークスペース設定ファイル（任意）: ❌ 未実装
+  - ワークスペース設定ファイル（任意）: ✅ 実装済み（TOML > YAML > VS Code）
     - `.blog-lsp.toml` (TOML形式) - 推奨、複数行文字列が書きやすい
     - `.blog-lsp.yml` (YAML形式) - 代替形式
     - スタイルプロンプトの記述に適している（Prettier/ESLintのパターンに準拠）
@@ -62,9 +60,9 @@
 
 ## 設定項目
 
-### ワークスペース設定ファイル（未実装）
+### ワークスペース設定ファイル（実装済み）
 
-プロジェクトルートに `.blog-lsp.toml` または `.blog-lsp.yml` を配置して、リポジトリ管理可能な設定を記述できます。
+プロジェクトルートに `.blog-lsp.toml` または `.blog-lsp.yml` を配置して、リポジトリ管理可能な設定を記述できます（読み込みは TOML > YAML > VS Code 設定の優先順位）。
 
 **`.blog-lsp.toml` の例**:
 
@@ -108,14 +106,13 @@ completion:
 1. `.blog-lsp.toml` (ワークスペースルート)
 2. `.blog-lsp.yml` (ワークスペースルート)
 3. VS Code設定 `blogLsp.stylePrompt`
-4. VS Code設定 `blogLsp.style` (既存のenum、後方互換)
-5. デフォルト値
+4. デフォルト値
 
 ✅ **実装済みの設定項目**:
 
 ```json
 {
-  "blogLsp.provider": "openai",                // ✅ 実装済み (openai, azure-openai)
+  "blogLsp.provider": "openai",                // ✅ 実装済み (openai, openai-compatible/local(-openai), azure-openai, anthropic)
   "blogLsp.model": "gpt-5-nano",               // ✅ 実装済み (デフォルト: gpt-5-nano)
   "blogLsp.apiBaseUrl": "https://api.openai.com/v1", // ✅ 実装済み
   "blogLsp.apiKey": "${env:OPENAI_API_KEY}",   // ✅ 実装済み (環境変数参照 + シークレットストレージ)
@@ -124,8 +121,7 @@ completion:
   "blogLsp.reasoningEffort": "minimal",        // ✅ 実装済み (gpt-5系で使用)
   "blogLsp.verbosity": "low",                  // ✅ 実装済み (gpt-5系で使用)
   "blogLsp.numSuggestions": 1,                 // ✅ 実装済み (1-5, デフォルト: 1)
-  "blogLsp.style": "tech-blog",                // ✅ 実装済み (tech-blog, casual, formal)
-                                                  // 将来的には .blog-lsp.toml で詳細なスタイルプロンプトを記述可能に
+  "blogLsp.stylePrompt": "",                    // ✅ 実装済み（複数行スタイルプロンプトでデフォルトを上書き）
   "blogLsp.language": "ja",                    // ✅ 実装済み (ja, en)
   "blogLsp.privacy.scope": "paragraph",        // ✅ 実装済み (selection, paragraph, document)
   "blogLsp.enableStreaming": true,             // ⚠️ 設定のみ（実装未対応）
@@ -142,8 +138,8 @@ completion:
 
 ✅ **実装済み**:
 
-- **システム指示**: 役割（技術ブログ編集者）、文体（読みやすく、冗長さを避ける、事実ベース）
-  - 実装場所: `shared/src/index.ts` の `buildSystemPrompt()`
+- **システム指示**: 役割（技術ブログ編集者）、言語（ja/en）、スタイル（`stylePrompt` 指定時はそれを使用、未指定時はデフォルトテンプレート）
+  - 実装場所: `shared/src/index.ts` の `buildSystemPrompt()` と `shared/src/markdown/prompts/style-default.txt`
 - **コンテキスト**: 前後の段落、直近の見出し、ユーザー設定（言語/文体/長さ）
   - 実装場所: `shared/src/markdown/prompt-builder.ts`
 - **プロンプトテンプレート**: Mustacheテンプレートを使用
@@ -162,7 +158,6 @@ Continue the paragraph naturally and propose 2 alternative continuations.
 
 ❌ **未実装**:
 - **安全策**: 秘匿情報のマスキング、URL/コード変更の防止ガイドライン
-- **スタイルプロンプトの詳細記述**: `.blog-lsp.toml` での複数行スタイルプロンプト記述機能
 
 ## 最低限の LSP インターフェイス
 
@@ -337,15 +332,16 @@ interface LlmProvider {
    - ✅ プライバシースコープ制御
 
 2. **LLM統合**
-   - ✅ OpenAI プロバイダ
-   - ✅ Azure OpenAI プロバイダ
-   - ✅ LangChain.js による抽象化
+  - ✅ OpenAI プロバイダ（OpenAI互換/ローカル互換含む）
+  - ✅ Azure OpenAI プロバイダ
+  - ✅ Anthropic プロバイダ
+  - ✅ LangChain.js による抽象化
 
 3. **設定管理**
    - ✅ VS Code 設定UI
    - ✅ 環境変数参照
    - ✅ シークレットストレージ
-
+  - ✅ ワークスペース設定ファイル（`.blog-lsp.toml`/`.blog-lsp.yml`）
 4. **LSP機能**
    - ✅ Completion
    - ✅ DocumentSymbol
@@ -364,14 +360,9 @@ interface LlmProvider {
 ### ❌ 未実装・今後の課題
 
 1. **機能拡張**（優先順位順）
-   - ワークスペース設定ファイル (`.blog-lsp.toml` または `.blog-lsp.yml`) - **最優先**
-     - 複数行のスタイルプロンプトを自然言語で記述可能
-     - リポジトリ管理に適した形式（Prettier/ESLintのパターンに準拠）
-     - 優先順位: `.blog-lsp.toml` > `.blog-lsp.yml` > VS Code設定 > デフォルト
-     - 変更検知とホットリロード: 設定ファイル保存時に即時反映（FS watch または `workspace/didChangeWatchedFiles`）
-   - 追加プロバイダ（Anthropic, Local/OpenAI互換） - **優先度：高**
-     - Anthropic: Claude API対応
-     - Local/OpenAI互換: ローカルLLMやOpenAI互換API対応（例：Ollama、vLLM等）
+   - ワークスペース設定ファイルのホットリロード
+     - 設定ファイル保存時の自動反映（FS watch または `workspace/didChangeWatchedFiles`）
+   - 追加プロバイダ（Google） - **優先度：中**
    - Googleプロバイダ - 優先度：中
    - ストリーミング実装（コマンド実行時のみ、優先度：低）
 

@@ -27,6 +27,7 @@ export class CompletionService {
       currentLine: string;
       linesAfter: string[];
     },
+    fullText: string,
     position: Position,
     config: BlogLspConfig,
     provider: LlmProvider,
@@ -37,6 +38,8 @@ export class CompletionService {
       linesBefore: context.linesBefore,
       currentLine: context.currentLine,
       linesAfter: context.linesAfter,
+      fullText,
+      position,
       config,
     });
 
@@ -77,6 +80,7 @@ export class CompletionService {
       currentLine: string;
       linesAfter: string[];
     },
+    fullText: string,
     position: Position,
     config: BlogLspConfig,
     provider: LlmProvider,
@@ -87,6 +91,8 @@ export class CompletionService {
       currentText: context.currentText,
       linesBefore: context.linesBefore,
       linesAfter: context.linesAfter,
+      fullText,
+      position,
       config,
     });
 

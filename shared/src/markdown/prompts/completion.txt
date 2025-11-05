@@ -2,7 +2,7 @@
 
 [Context Data]
 
-{{contextJson}}
+{{{contextJsonString}}}
 
 [Task]
 Article Title: {{contextJson.articleTitle}}

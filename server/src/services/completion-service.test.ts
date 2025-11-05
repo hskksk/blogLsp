@@ -54,6 +54,7 @@ describe('completion-service.ts', () => {
     };
 
     const mockPosition: Position = { line: 1, character: 5 };
+    const mockFullText = '# Test Heading\n\nSome content here.';
 
     describe('generateHeadingCompletion', () => {
       it('should generate heading completion items', async () => {
@@ -69,6 +70,7 @@ describe('completion-service.ts', () => {
 
         const result = await completionService.generateHeadingCompletion(
           context,
+          mockFullText,
           mockPosition,
           mockConfig,
           mockProvider as any,
@@ -96,6 +98,7 @@ describe('completion-service.ts', () => {
 
         const result = await completionService.generateHeadingCompletion(
           context,
+          mockFullText,
           mockPosition,
           mockConfig,
           mockProvider as any,
@@ -117,6 +120,7 @@ describe('completion-service.ts', () => {
 
         await completionService.generateHeadingCompletion(
           context,
+          mockFullText,
           mockPosition,
           mockConfig,
           mockProvider as any,
@@ -145,6 +149,7 @@ describe('completion-service.ts', () => {
 
         const result = await completionService.generateTextCompletion(
           context,
+          mockFullText,
           mockPosition,
           mockConfig,
           mockProvider as any,
@@ -172,6 +177,7 @@ describe('completion-service.ts', () => {
 
         const result = await completionService.generateTextCompletion(
           context,
+          mockFullText,
           mockPosition,
           mockConfig,
           mockProvider as any,
@@ -193,6 +199,7 @@ describe('completion-service.ts', () => {
 
         await completionService.generateTextCompletion(
           context,
+          mockFullText,
           mockPosition,
           mockConfig,
           mockProvider as any,
@@ -224,6 +231,7 @@ describe('completion-service.ts', () => {
 
         await completionService.generateTextCompletion(
           context,
+          mockFullText,
           mockPosition,
           mockConfig,
           mockProvider as any,

@@ -21,8 +21,10 @@ describe('prompt-builder stylePrompt', () => {
     const config = makeConfig({ stylePrompt: 'CUSTOM STYLE LINE' });
     const prompt = buildCompletionPrompt({
       currentText: 'Hello',
-      linesBefore: [],
-      linesAfter: [],
+      linesBefore: ['Hello'],
+      linesAfter: ['Hello'],
+      fullText: 'Hello',
+      position: { line: 1, character: 1 },
       config,
     });
 

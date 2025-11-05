@@ -44,6 +44,8 @@ export class CommandService {
       currentText: selectedText || context.currentText,
       linesBefore: context.linesBefore,
       linesAfter: context.linesAfter,
+      fullText: text,
+      position: range.start,
       config,
     });
 
@@ -115,6 +117,8 @@ export class CommandService {
       currentText: context.currentText,
       linesBefore: context.linesBefore,
       linesAfter: context.linesAfter,
+      fullText: text,
+      position: pos,
       config,
     });
 
@@ -185,6 +189,8 @@ export class CommandService {
       linesBefore: context.linesBefore,
       currentLine: context.currentLine,
       linesAfter: context.linesAfter,
+      fullText: text,
+      position: pos,
       config,
     });
 

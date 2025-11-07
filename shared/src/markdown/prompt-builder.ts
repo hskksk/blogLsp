@@ -54,6 +54,49 @@ interface ArticleInfo {
   suggestNextSectionHeading?: boolean;
 }
 
+/**
+ * 見出し提案用の判定を行うヘルパー関数（テストしやすいように切り出し）
+ */
+export function analyzeHeadingSuggestion(
+  text: string,
+  position: Position
+): {
+  currentLineHeadingLevel?: number;
+  nearestHeadingLevel?: number;
+  suggestSubSectionHeading?: boolean;
+  suggestNextSectionHeading?: boolean;
+} {
+  const currentLineHeading = isHeadingAtPosition(text, position);
+  const nearestHeading = findNearestHeadingBefore(text, position);
+
+  let suggestSubSectionHeading: boolean | undefined;
+  let suggestNextSectionHeading: boolean | undefined;
+  let currentLineHeadingLevel: number | undefined;
+  let nearestHeadingLevel: number | undefined;
+
+  if (currentLineHeading) {
+    currentLineHeadingLevel = currentLineHeading.level;
+    nearestHeadingLevel = nearestHeading?.level;
+
+    if (nearestHeadingLevel !== undefined) {
+      // 現在行の見出しレベルが直前の見出しより深い（値が大きい）場合
+      suggestSubSectionHeading = currentLineHeadingLevel > nearestHeadingLevel;
+      // 現在行の見出しレベルが直前の見出しと同じ場合
+      suggestNextSectionHeading = currentLineHeadingLevel === nearestHeadingLevel;
+    } else {
+      // 直前の見出しがない場合は次セクションとして扱う
+      suggestNextSectionHeading = true;
+    }
+  }
+
+  return {
+    currentLineHeadingLevel,
+    nearestHeadingLevel,
+    suggestSubSectionHeading,
+    suggestNextSectionHeading,
+  };
+}
+
 function extractArticleInfo(text: string, position: Position): ArticleInfo {
   const lines = text.split(/\r\n|\r|\n/);
   
@@ -125,25 +168,10 @@ function extractArticleInfo(text: string, position: Position): ArticleInfo {
   const nearestHeading = findNearestHeadingBefore(text, position);
   const currentSectionHeading = nearestHeading?.text;
   
-  // 見出し提案の種類を判定
-  const currentLineHeading = isHeadingAtPosition(text, position);
-  let suggestSubSectionHeading: boolean | undefined;
-  let suggestNextSectionHeading: boolean | undefined;
-  
-  if (currentLineHeading) {
-    const currentLevel = currentLineHeading.level;
-    const previousLevel = nearestHeading?.level;
-    
-    if (previousLevel !== undefined) {
-      // 現在行の見出しレベルが直前の見出しより深い（大きい値）場合
-      suggestSubSectionHeading = currentLevel > previousLevel;
-      // 現在行の見出しレベルが直前の見出しと同じ深さの場合
-      suggestNextSectionHeading = currentLevel === previousLevel;
-    } else {
-      // 直前の見出しがない場合は、次のセクションとして扱う
-      suggestNextSectionHeading = true;
-    }
-  }
+  // 見出し提案の種類を判定（切り出し関数を使用）
+  const suggestion = analyzeHeadingSuggestion(text, position);
+  const suggestSubSectionHeading = suggestion.suggestSubSectionHeading;
+  const suggestNextSectionHeading = suggestion.suggestNextSectionHeading;
   
   return {
     articleTitle: articleTitle || '',

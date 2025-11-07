@@ -64,7 +64,7 @@ export function findNearestHeadingBefore(text: string, position: Position): Head
   const lines = text.split(/\r\n|\r|\n/);
   
   // カーソル位置より前の行を逆順で検索
-  for (let i = position.line; i >= 0; i--) {
+  for (let i = position.line - 1; i >= 0; i--) {
     const headingInfo = getHeadingInfo(lines[i], i);
     if (headingInfo) {
       return headingInfo;
